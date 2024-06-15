@@ -60,9 +60,7 @@ app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 @app.on_message(filters.command("check"))
 async def check(client, message):
     user_id = message.from_user.id
-
     verify_status = await db_verify_status(user_id)
-    print(f"Verify status for user {user_id}: {verify_status}")
 
     if verify_status['is_verified']:
         expiry_time = get_exp_time(VERIFY_EXPIRE - (time.time() - verify_status['verified_time']))
@@ -74,10 +72,7 @@ async def check(client, message):
 async def start_command(client, message):
     user_id = message.from_user.id
     if not await present_user(user_id):
-        user_details = json.dumps(
-            {"username": message.from_user.username, "first_name": message.from_user.first_name, "last_name": message.from_user.last_name}
-        )
-        await add_user(user_id, user_details)
+        await add_user(user_id)
 
     sticker_message = await message.reply_sticker("CAACAgIAAxkBAAEYonplzwrczhVu3I6HqPBzro3L2JU6YAACvAUAAj-VzAoTSKpoG9FPRjQE")
     await asyncio.sleep(2)
@@ -140,8 +135,7 @@ async def handle_message(client, message: Message):
             await db_update_verify_status(user_id, {**verify_status, 'is_verified': True, 'verified_time': time.time()})
             await message.reply("Your token successfully verified and valid for: 24 Hour")
         elif len(message.text) > 7 and verify_status['is_verified']:
-            # Handle valid verified user message
-            await handle_message(client, message)
+            await process_terabox_link(client, message, user_id, user_mention, verify_status)
         else:
             if IS_VERIFY and not verify_status['is_verified']:
                 token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
@@ -150,6 +144,7 @@ async def handle_message(client, message: Message):
                 await db_update_verify_status(user_id, {**verify_status, 'verify_token': token, 'link': link})
                 await message.reply(f"Your Ads token is expired, refresh your token and try again.\n\nToken Timeout: {get_exp_time(VERIFY_EXPIRE)}\n\nWhat is the token?\n\nThis is an ads token. If you pass 1 ad, you can use the bot for 24 Hour after passing the ad.\n\n[Click here to verify your token]({link})")
 
+async def process_terabox_link(client, message, user_id, user_mention, verify_status):
     terabox_link = message.text.strip()
     if "terabox" not in terabox_link:
         await message.reply_text("ᴘʟᴇᴀsᴇ sᴇɴᴅ ᴀ ᴠᴀʟɪᴅ ᴛᴇʀᴀʙᴏx ʟɪɴᴋ.")
