@@ -1,7 +1,6 @@
 pymongo
 asyncio
 motor
-from shortzy import Shortzy
 #pyrogram
 pyrogram==2.0.40
 python-dotenv==1.0.0
