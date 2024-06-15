@@ -6,4 +6,5 @@ pyrogram==2.0.40
 python-dotenv==1.0.0
 requests==2.31.0
 redis==4.5.4
-shortzy  # Add this if shortzy is a third-party module
+#shortzy  # Add this if shortzy is a third-party module
+pyshorteners
