@@ -2,3 +2,4 @@ pymongo
 asyncio
 motor
 shortzy
+pyrogram
