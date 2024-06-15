@@ -9,3 +9,5 @@ aiohttp[speedups]
 pillow
 hachoir
 requests
+os
+time
