@@ -1,5 +1,10 @@
 pymongo
-asyncio
+#asyncio
 motor
 shortzy
-pyrogram
+#pyrogram
+pyrogram==2.0.40  # or the latest stable version
+python-dotenv==1.0.0  # or the latest stable version
+asyncio==3.4.3  # asyncio is a part of the Python standard library, so you don't need to install it separately if you're using Python 3.4+.
+requests==2.31.0  # If you're using requests in helper_func for get_shortlink
+redis==4.5.4  # If you're using Redis as your database backend
