@@ -1,4 +1,4 @@
-from pyrogram import Client, filters
+#from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 import logging
 import asyncio
@@ -10,6 +10,25 @@ import os
 import time
 from status import format_progress_bar
 from video import download_video, upload_video
+
+import json
+import random
+import string
+import logging
+from uuid import uuid4
+from pyrogram import Client, filters, __version__
+from pyrogram.enums import ParseMode
+# from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+# from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated
+from helper_func import (
+    get_shortlink,
+    get_verify_status,
+    update_verify_status,
+    get_exp_time,
+)
+from config import *
+from database.database import present_user, add_user, db_verify_status, db_update_verify_status
+from shortzy import Shortzy
 
 load_dotenv('config.env', override=True)
 
