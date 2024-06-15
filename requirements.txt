@@ -1,8 +1,10 @@
-telethon
+
+pyrogram
 cryptg
 pyaes
 aiohttp
 aiodns
+asyncio
 aiohttp[speedups]
 pillow
 hachoir
