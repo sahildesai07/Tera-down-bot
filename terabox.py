@@ -10,6 +10,7 @@ import time
 import random
 import string
 import json
+from shortzy import Shortzy
 from uuid import uuid4
 from helper_func import (
     get_shortlink,
