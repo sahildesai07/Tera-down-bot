@@ -1,5 +1,5 @@
 # Use the official Python runtime as a parent image
-FROM python:3.9
+FROM hrishi2861/terabox:latest
 
 # Set the working directory in the container
 WORKDIR /app
