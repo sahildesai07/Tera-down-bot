@@ -13,6 +13,7 @@ from pymongo import MongoClient
 load_dotenv('config.env', override=True)
 logging.basicConfig(level=logging.INFO)
 
+ADMINS = 6695586027
 api_id = os.environ.get('TELEGRAM_API', 22505271)
 if len(str(api_id)) == 0:
     logging.error("TELEGRAM_API variable is missing! Exiting now")
@@ -113,7 +114,8 @@ async def handle_message(client, message: Message):
         logging.error(f"Error handling message: {e}")
         await reply_msg.edit_text("ғᴀɪʟᴇᴅ ᴛᴏ ᴘʀᴏᴄᴇss ʏᴏᴜʀ ʀᴇǫᴜᴇsᴛ.\nɪғ ʏᴏᴜʀ ғɪʟᴇ sɪᴢᴇ ɪs ᴍᴏʀᴇ ᴛʜᴀɴ 120ᴍʙ ɪᴛ ᴍɪɢʜᴛ ғᴀɪʟ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ.")
 
-@app.on_message(filters.command("broadcast") & filters.user(6695586027))  # Replace <your_user_id> with your actual user ID to restrict this command
+@app.on_message(filters.command('broadcast') & filters.user(ADMINS))
+# @app.on_message(filters.command("broadcast") & filters.user(6695586027))  # Replace <your_user_id> with your actual user ID to restrict this command
 async def broadcast_command(client, message):
     if len(message.command) < 2:
         await message.reply_text("Please provide a message to broadcast.")
