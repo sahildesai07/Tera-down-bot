@@ -7,13 +7,15 @@ from pyrogram.enums import ChatMemberStatus
 from dotenv import load_dotenv
 from os import environ
 import os
-import time
+from status import format_progress_bar
+from video import download_video, upload_video
 from pymongo import MongoClient
 import random
 import string
 import time
 from database.database import present_user, add_user, db_verify_status, db_update_verify_status
 from shortzy import Shortzy 
+
 
 load_dotenv('config.env', override=True)
 logging.basicConfig(level=logging.INFO)
@@ -52,6 +54,12 @@ mongo_url = os.environ.get('MONGO_URL', 'mongodb+srv://ultroidxTeam:ultroidxTeam
 client = MongoClient(mongo_url)
 db = client['uphdlust']
 users_collection = db['users']
+
+SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "instantearn.in")
+SHORTLINK_API = os.environ.get("SHORTLINK_API", "47070a188ed5491b80f3b70adde6f9954a1e6ee7")
+VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 86400)) # Add time in seconds
+IS_VERIFY = os.environ.get("IS_VERIFY", "True")
+TUT_VID = os.environ.get("TUT_VID", "https://t.me/Ultroid_Official/18") # shareus ka tut_vid he 
 
 def save_user(user_id, username):
     if users_collection.find_one({'user_id': user_id}) is None:
@@ -163,6 +171,10 @@ async def is_user_member(client, user_id):
         logging.error(f"Error checking membership status for user {user_id}: {e}")
         return False
 
+# Function to validate terabox link
+def is_terabox_link(link):
+    return "terabox" in link
+
 # Message handler for handling incoming messages
 @app.on_message(filters.text)
 async def handle_message(client, message: Message):
@@ -189,7 +201,9 @@ async def handle_message(client, message: Message):
         return
 
     terabox_link = message.text.strip()
-    if "terabox" not in terabox_link:
+
+    # Validate terabox link
+    if not is_terabox_link(terabox_link):
         await message.reply_text("Please send a valid terabox link.")
         return
 
@@ -202,8 +216,8 @@ async def handle_message(client, message: Message):
         logging.error(f"Error handling message: {e}")
         await reply_msg.edit_text("Failed to process your request.\nIf your file size is more than 120MB, it might fail to download.")
 
+# Broadcast command handler
 @app.on_message(filters.command('broadcast') & filters.user(ADMINS))
-# @app.on_message(filters.command("broadcast") & filters.user(6695586027))  # Replace <your_user_id> with your actual user ID to restrict this command
 async def broadcast_command(client, message):
     if len(message.command) < 2:
         await message.reply_text("Please provide a message to broadcast.")
