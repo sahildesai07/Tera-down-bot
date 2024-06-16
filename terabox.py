@@ -16,7 +16,7 @@ from status import format_progress_bar
 from video import download_video, upload_video
 from database.database import present_user, add_user, db_verify_status, db_update_verify_status
 from shortzy import Shortzy 
-
+from pymongo.errors import DuplicateKeyError
 
 
 load_dotenv('config.env', override=True)
@@ -65,14 +65,18 @@ TUT_VID = os.environ.get("TUT_VID", "https://t.me/Ultroid_Official/18") # shareu
 
 def save_user(user_id, username):
     try:
-        if users_collection.find_one({'user_id': user_id}) is None:
+        existing_user = users_collection.find_one({'user_id': user_id})
+        if existing_user is None:
             users_collection.insert_one({'user_id': user_id, 'username': username})
             logging.info(f"Saved new user {username} with ID {user_id} to the database.")
         else:
-            logging.info(f"User {username} with ID {user_id} is already in the database.")
+            # Update existing user details
+            users_collection.update_one({'user_id': user_id}, {'$set': {'username': username}})
+            logging.info(f"Updated user {username} with ID {user_id} in the database.")
     except DuplicateKeyError as e:
         logging.error(f"DuplicateKeyError: {e}")
         # Handle the error appropriately, such as updating the existing document or logging the error.
+
 
 
 app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
