@@ -9,6 +9,11 @@ from os import environ
 import os
 import time
 from pymongo import MongoClient
+import random
+import string
+import time
+from database.database import present_user, add_user, db_verify_status, db_update_verify_status
+
 
 load_dotenv('config.env', override=True)
 logging.basicConfig(level=logging.INFO)
@@ -57,19 +62,44 @@ def save_user(user_id, username):
 
 app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
+# Start command handler
 @app.on_message(filters.command("start"))
 async def start_command(client, message):
     user_id = message.from_user.id
     username = message.from_user.username
-    save_user(user_id, username)  # Save user to MongoDB
+    await add_user(user_id)  # Save user to MongoDB if not already present
+
+    # Save user to MongoDB
+    save_user(user_id, username)  
 
     sticker_message = await message.reply_sticker("CAACAgIAAxkBAAEYonplzwrczhVu3I6HqPBzro3L2JU6YAACvAUAAj-VzAoTSKpoG9FPRjQE")
     await asyncio.sleep(2)
     await sticker_message.delete()
     user_mention = message.from_user.mention
-    reply_message = f"ᴡᴇʟᴄᴏᴍᴇ, {user_mention}.\n\n🌟 ɪ ᴀᴍ ᴀ ᴛᴇʀᴀʙᴏx ᴅᴏᴡɴʟᴏᴀᴅᴇʀ ʙᴏᴛ. sᴇɴᴅ ᴍᴇ ᴀɴʏ ᴛᴇʀᴀʙᴏx ʟɪɴᴋ ɪ ᴡɪʟʟ ᴅᴏᴡɴʟᴏᴀᴅ ᴡɪᴛʜɪɴ ғᴇᴡ sᴇᴄᴏɴᴅs ᴀɴᴅ sᴇɴᴅ ɪᴛ ᴛᴏ ʏᴏᴜ ✨."
-    join_button = InlineKeyboardButton("ᴊᴏɪɴ ❤️🚀", url="https://t.me/ultroid_official")
-    developer_button = InlineKeyboardButton("ᴅᴇᴠᴇʟᴏᴘᴇʀ ⚡️", url="https://t.me/ultroidxTeam")
+    
+    # Check if user is verified
+    verify_status = await db_verify_status(user_id)
+    
+    if not verify_status["is_verified"]:
+        # Generate token and short link for verification
+        token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://telegram.dog/DRM2_bot?start=verify_{token}')
+        await db_update_verify_status(user_id, {**verify_status, 'verify_token': token, 'link': link})
+        message_text = (
+            "Welcome to the bot!\n\n"
+            "To use the bot, please verify your identity.\n\n"
+            f"Token Timeout: {get_exp_time(VERIFY_EXPIRE)}\n\n"
+            "What is the token?\n\n"
+            "This is a verification token. Once verified, you can use the bot for 24 hours.\n\n"
+            f"[Click here]({link}) to verify your token."
+        )
+        await message.reply(message_text, parse_mode='markdown')
+        return
+
+    # If verified, provide regular welcome message and functionality
+    reply_message = f"Welcome, {user_mention}.\n\n🌟 I am a terabox downloader bot. Send me any terabox link and I will download it within a few seconds and send it to you ✨."
+    join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/ultroid_official")
+    developer_button = InlineKeyboardButton("Developer ⚡️", url="https://t.me/ultroidxTeam")
     reply_markup = InlineKeyboardMarkup([[join_button, developer_button]])
     await message.reply_text(reply_message, reply_markup=reply_markup)
 
@@ -85,34 +115,44 @@ async def is_user_member(client, user_id):
         logging.error(f"Error checking membership status for user {user_id}: {e}")
         return False
 
+# Message handler for handling incoming messages
 @app.on_message(filters.text)
 async def handle_message(client, message: Message):
     user_id = message.from_user.id
     username = message.from_user.username
-    save_user(user_id, username)  # Save user to MongoDB
+    await add_user(user_id)  # Save user to MongoDB if not already present
 
     user_mention = message.from_user.mention
+    
+    # Check if user is verified
+    verify_status = await db_verify_status(user_id)
+
+    if not verify_status["is_verified"]:
+        await message.reply_text("To use this bot, please verify your identity. Click /start to begin.")
+        return
+
+    # Additional checks or actions based on message content
     is_member = await is_user_member(client, user_id)
 
     if not is_member:
-        join_button = InlineKeyboardButton("ᴊᴏɪɴ ❤️🚀", url="https://t.me/ultroid_official")
+        join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/ultroid_official")
         reply_markup = InlineKeyboardMarkup([[join_button]])
-        await message.reply_text("ʏᴏᴜ ᴍᴜsᴛ ᴊᴏɪɴ ᴍʏ ᴄʜᴀɴɴᴇʟ ᴛᴏ ᴜsᴇ ᴍᴇ.", reply_markup=reply_markup)
+        await message.reply_text("You must join my channel to use me.", reply_markup=reply_markup)
         return
 
     terabox_link = message.text.strip()
     if "terabox" not in terabox_link:
-        await message.reply_text("ᴘʟᴇᴀsᴇ sᴇɴᴅ ᴀ ᴠᴀʟɪᴅ ᴛᴇʀᴀʙᴏx ʟɪɴᴋ.")
+        await message.reply_text("Please send a valid terabox link.")
         return
 
-    reply_msg = await message.reply_text("sᴇɴᴅɪɴɢ ʏᴏᴜ ᴛʜᴇ ᴍᴇᴅɪᴀ...🤤")
+    reply_msg = await message.reply_text("Sending you the media...🤤")
 
     try:
         file_path, thumbnail_path, video_title = await download_video(terabox_link, reply_msg, user_mention, user_id)
         await upload_video(client, file_path, thumbnail_path, video_title, reply_msg, dump_id, user_mention, user_id, message)
     except Exception as e:
         logging.error(f"Error handling message: {e}")
-        await reply_msg.edit_text("ғᴀɪʟᴇᴅ ᴛᴏ ᴘʀᴏᴄᴇss ʏᴏᴜʀ ʀᴇǫᴜᴇsᴛ.\nɪғ ʏᴏᴜʀ ғɪʟᴇ sɪᴢᴇ ɪs ᴍᴏʀᴇ ᴛʜᴀɴ 120ᴍʙ ɪᴛ ᴍɪɢʜᴛ ғᴀɪʟ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ.")
+        await reply_msg.edit_text("Failed to process your request.\nIf your file size is more than 120MB, it might fail to download.")
 
 @app.on_message(filters.command('broadcast') & filters.user(ADMINS))
 # @app.on_message(filters.command("broadcast") & filters.user(6695586027))  # Replace <your_user_id> with your actual user ID to restrict this command
