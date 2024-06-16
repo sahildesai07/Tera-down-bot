@@ -226,10 +226,9 @@ async def handle_message(client, message: Message):
         logging.error(f"Error handling message: {e}")
         await reply_msg.edit_text("Failed to process your request.\nIf your file size is more than 120MB, it might fail to download.")
 
-# Broadcast command handler
 @app.on_message(filters.command('broadcast') & filters.user(ADMINS))
 async def broadcast_command(client, message):
- if message.reply_to_message:
+    if message.reply_to_message:
         query = await full_userbase()
         broadcast_msg = message.reply_to_message
         total = 0
@@ -266,12 +265,12 @@ Blocked Users: <code>{blocked}</code>
 Deleted Accounts: <code>{deleted}</code>
 Unsuccessful: <code>{unsuccessful}</code></b>"""
         
-        return await pls_wait.edit(status)
-
+        await pls_wait.edit(status)
     else:
         msg = await message.reply(REPLY_ERROR)
         await asyncio.sleep(8)
         await msg.delete()
+
 
 if __name__ == "__main__":
     app.run()
