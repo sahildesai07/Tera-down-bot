@@ -1,19 +1,17 @@
-# Start with the base image
-FROM hrishi2861/terabox:latest
+# Use the official Python runtime as a parent image
+FROM python:3.9
 
-# Set the working directory inside the container
+# Set the working directory in the container
 WORKDIR /app
 
 # Copy the current directory contents into the container at /app
 COPY . .
 
-# Install required packages from requirements.txt
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt
+# Install any needed packages specified in requirements.txt
+# RUN pip install --no-cache-dir --upgrade pip && \
+#     pip install -r requirements.txt
 
-# Expose any ports the app is expected to listen on
-# For example, if your application runs on port 8080, use:
-# EXPOSE 8080
-
-# Define the command to run your app using CMD which defines your runtime.
-CMD ["bash", "start.sh"]
+# Run your bot application
+CMD ["python", "bot.py"]
