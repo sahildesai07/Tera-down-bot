@@ -1,0 +1,1 @@
+motor==2.5.0  # Specify the version according to your requirements
