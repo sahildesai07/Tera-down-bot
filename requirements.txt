@@ -2,3 +2,5 @@ pyrogram
 pymongo
 motor
 shortzy
+requests
+bs4
