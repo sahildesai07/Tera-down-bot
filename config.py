@@ -3,7 +3,7 @@ import os
 #Database 
 #Database [https://youtu.be/qFB0cFqiyOM?si=fVicsCcRSmpuja1A]
 DB_URI = os.environ.get("DATABASE_URL", "mongodb+srv://ultroidxTeam:ultroidxTeam@cluster0.gabxs6m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-DB_NAME = os.environ.get("DATABASE_NAME", "ultroidxTeam")
+DB_NAME = os.environ.get("DATABASE_NAME", "uphdlust")
 
 #Shortner (token system) 
 # check my discription to help by using my refer link of shareus.io
