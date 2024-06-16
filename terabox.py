@@ -6,51 +6,28 @@ import string
 import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
-from pyrogram import Client, filters, __version__
-from pyrogram.enums import ChatMemberStatus #, ParseMode
+from pyrogram import Client, filters
+from pyrogram.enums import ChatMemberStatus
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from pyrogram.errors import FloodWait , UserIsBlocked, InputUserDeactivated 
+from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated
 from os import environ
-from status import format_progress_bar
-from video import download_video, upload_video
-from database.database import present_user, add_user,full_userbase, del_user, db_verify_status, db_update_verify_status
-from shortzy import Shortzy 
+import time
+from status import format_progress_bar  # Assuming this is a custom module
+from video import download_video, upload_video  # Assuming these are custom modules
+from database.database import present_user, add_user, full_userbase, del_user, db_verify_status, db_update_verify_status  # Assuming these are custom modules
+from shortzy import Shortzy  # Assuming this is a custom module
 from pymongo.errors import DuplicateKeyError
-
 
 load_dotenv('config.env', override=True)
 logging.basicConfig(level=logging.INFO)
 
-ADMINS = 6695586027
-api_id = os.environ.get('TELEGRAM_API', 22505271)
-if len(str(api_id)) == 0:
-    logging.error("TELEGRAM_API variable is missing! Exiting now")
-    exit(1)
-
+ADMINS = [6695586027]  # Ensure ADMINS is a list
+api_id = int(os.environ.get('TELEGRAM_API', '22505271'))
 api_hash = os.environ.get('TELEGRAM_HASH', 'c89a94fcfda4bc06524d0903977fc81e')
-if len(api_hash) == 0:
-    logging.error("TELEGRAM_HASH variable is missing! Exiting now")
-    exit(1)
-    
 bot_token = os.environ.get('BOT_TOKEN', '7156255687:AAEXQtlTzE8Jbwt9VD6NLfcZX08Czu7w7gQ')
-if len(bot_token) == 0:
-    logging.error("BOT_TOKEN variable is missing! Exiting now")
-    exit(1)
-dump_id = os.environ.get('DUMP_CHAT_ID', '-1002062925443')
-if len(str(dump_id)) == 0:
-    logging.error("DUMP_CHAT_ID variable is missing! Exiting now")
-    exit(1)
-else:
-    dump_id = int(dump_id)
+dump_id = int(os.environ.get('DUMP_CHAT_ID', '-1002062925443'))
+fsub_id = int(os.environ.get('FSUB_ID', '-1002108419450'))
 
-fsub_id = os.environ.get('FSUB_ID', '-1002108419450')
-if len(str(fsub_id)) == 0:
-    logging.error("FSUB_ID variable is missing! Exiting now")
-    exit(1)
-else:
-    fsub_id = int(fsub_id)
-
-# MongoDB setup
 mongo_url = os.environ.get('MONGO_URL', 'mongodb+srv://ultroidxTeam:ultroidxTeam@cluster0.gabxs6m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
 client = MongoClient(mongo_url)
 db = client['uphdlust']
@@ -58,9 +35,9 @@ users_collection = db['users']
 
 SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "instantearn.in")
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "47070a188ed5491b80f3b70adde6f9954a1e6ee7")
-VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 86400)) # Add time in seconds
-IS_VERIFY = os.environ.get("IS_VERIFY", "True")
-TUT_VID = os.environ.get("TUT_VID", "https://t.me/Ultroid_Official/18") # shareus ka tut_vid he 
+VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 86400))  # 24 hours in seconds
+IS_VERIFY = os.environ.get("IS_VERIFY", "True") == "True"
+TUT_VID = os.environ.get("TUT_VID", "https://t.me/Ultroid_Official/18")
 
 def save_user(user_id, username):
     try:
@@ -69,14 +46,10 @@ def save_user(user_id, username):
             users_collection.insert_one({'user_id': user_id, 'username': username})
             logging.info(f"Saved new user {username} with ID {user_id} to the database.")
         else:
-            # Update existing user details
             users_collection.update_one({'user_id': user_id}, {'$set': {'username': username}})
             logging.info(f"Updated user {username} with ID {user_id} in the database.")
     except DuplicateKeyError as e:
         logging.error(f"DuplicateKeyError: {e}")
-        # Handle the error appropriately, such as updating the existing document or logging the error.
-
-
 
 app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
@@ -85,16 +58,15 @@ async def get_shortlink(url, api, link):
     link = await shortzy.convert(link)
     return link
 
-# Function to format expiration time
 def get_exp_time(seconds):
     periods = [('days', 86400), ('hours', 3600), ('mins', 60), ('secs', 1)]
     result = ''
     for period_name, period_seconds in periods:
         if seconds >= period_seconds:
             period_value, seconds = divmod(seconds, period_seconds)
-            result += f'{int(period_value)}{period_name}'
+            result += f'{int(period_value)}{period_name} '
     return result
-    
+
 def get_readable_time(seconds: int) -> str:
     count = 0
     up_time = ""
@@ -141,32 +113,56 @@ async def start_command(client, message):
     await asyncio.sleep(2)
     await sticker_message.delete()
     user_mention = message.from_user.mention
-    
-    # Check if user is verified
-    verify_status = await db_verify_status(user_id)
-    
-    if not verify_status["is_verified"]:
-        # Generate token and short link for verification
-        token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-        link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://telegram.dog/DRM2_bot?start=verify_{token}')
-        await db_update_verify_status(user_id, {**verify_status, 'verify_token': token, 'link': link})
-        message_text = (
-            "Welcome to the bot!\n\n"
-            "To use the bot, please verify your identity.\n\n"
-            f"Token Timeout: {get_exp_time(VERIFY_EXPIRE)}\n\n"
-            "What is the token?\n\n"
-            "This is a verification token. Once verified, you can use the bot for 24 hours.\n\n"
-            f"[Click here]({link}) to verify your token."
-        )
-        await message.reply(message_text)
-        return
 
-    # If verified, provide regular welcome message and functionality
+    verify_status = await db_verify_status(user_id)
+    logging.info(f"Verify status for user {user_id}: {verify_status}")
+
+    if verify_status["is_verified"] and VERIFY_EXPIRE < (time.time() - verify_status["verified_time"]):
+        await db_update_verify_status(user_id, {**verify_status, 'is_verified': False})
+
+    text = message.text
+    if "verify_" in text:
+        _, token = text.split("_", 1)
+        logging.info(f"Extracted token: {token}")
+        if verify_status["verify_token"] != token:
+            return await message.reply("Your token is invalid or expired. Try again by clicking /start.")
+        await db_update_verify_status(user_id, {**verify_status, 'is_verified': True, 'verified_time': time.time()})
+        await message.reply("Your token has been successfully verified and is valid for 24 hours.")
+    elif len(text) > 7 and verify_status["is_verified"]:
+        pass
+    else:
+        if IS_VERIFY and not verify_status['is_verified']:
+            token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+            logging.info(f"Generated token: {token}")
+            link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://telegram.dog/DRM2_bot?start=verify_{token}')
+            await db_update_verify_status(user_id, {**verify_status, 'verify_token': token, 'link': link})
+            message_text = (
+                "Your ads token has expired. Please refresh your token and try again.\n\n"
+                f"Token Timeout: {get_exp_time(VERIFY_EXPIRE)}\n\n"
+                "What is the token?\n\n"
+                "This is an ads token. If you pass 1 ad, you can use the bot for 24 hours after passing the ad.\n\n"
+                f"[Click here]({link}) to refresh your token."
+            )
+            await message.reply(message_text, parse_mode='markdownv2')
+
     reply_message = f"Welcome, {user_mention}.\n\n🌟 I am a terabox downloader bot. Send me any terabox link and I will download it within a few seconds and send it to you ✨."
     join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/ultroid_official")
     developer_button = InlineKeyboardButton("Developer ⚡️", url="https://t.me/ultroidxTeam")
     reply_markup = InlineKeyboardMarkup([[join_button, developer_button]])
     await message.reply_text(reply_message, reply_markup=reply_markup)
+
+@app.on_message(filters.command("check"))
+async def check_command(client, message):
+    user_id = message.from_user.id
+
+    verify_status = await db_verify_status(user_id)
+    logging.info(f"Verify status for user {user_id}: {verify_status}")
+
+    if verify_status['is_verified']:
+        expiry_time = get_exp_time(VERIFY_EXPIRE - (time.time() - verify_status['verified_time']))
+        await message.reply(f"Your token is verified and valid for {expiry_time}.")
+    else:
+        await message.reply("Your token is not verified or has expired.")
 
 async def is_user_member(client, user_id):
     try:
@@ -180,27 +176,26 @@ async def is_user_member(client, user_id):
         logging.error(f"Error checking membership status for user {user_id}: {e}")
         return False
 
-# Function to validate terabox link
 def is_terabox_link(link):
     return "terabox" in link
 
-# Message handler for handling incoming messages
 @app.on_message(filters.text)
 async def handle_message(client, message: Message):
     user_id = message.from_user.id
-    username = message.from_user.username
-    await add_user(user_id)  # Save user to MongoDB if not already present
+    if not await present_user(user_id):
+        try:
+            await add_user(user_id)
+        except Exception as e:
+            logging.error(f"Failed to add user {user_id} to the database: {e}")
 
     user_mention = message.from_user.mention
     
-    # Check if user is verified
     verify_status = await db_verify_status(user_id)
 
     if not verify_status["is_verified"]:
         await message.reply_text("To use this bot, please verify your identity. Click /start to begin.")
         return
 
-    # Additional checks or actions based on message content
     is_member = await is_user_member(client, user_id)
 
     if not is_member:
@@ -211,7 +206,6 @@ async def handle_message(client, message: Message):
 
     terabox_link = message.text.strip()
 
-    # Validate terabox link
     if not is_terabox_link(terabox_link):
         await message.reply_text("Please send a valid terabox link.")
         return
@@ -256,20 +250,19 @@ async def broadcast_command(client, message):
                 pass
             total += 1
         
-        status = f"""<b><u>Broadcast Completed</u>
+        status = f"""<b><u>Broadcast Completed</u></b>
 
 Total Users: <code>{total}</code>
 Successful: <code>{successful}</code>
 Blocked Users: <code>{blocked}</code>
 Deleted Accounts: <code>{deleted}</code>
-Unsuccessful: <code>{unsuccessful}</code></b>"""
+Unsuccessful: <code>{unsuccessful}</code>"""
         
         await pls_wait.edit(status)
     else:
-        msg = await message.reply(REPLY_ERROR)
+        msg = await message.reply("Please reply to a message to broadcast it.")
         await asyncio.sleep(8)
         await msg.delete()
-
 
 if __name__ == "__main__":
     app.run()
