@@ -14,4 +14,4 @@ RUN pip3 install -r requirements.txt
 #     pip install -r requirements.txt
 
 # Run your bot application
-CMD ["python", "bot.py"]
+CMD ["bash", "start.sh"]
