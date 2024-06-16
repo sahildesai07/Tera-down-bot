@@ -8,37 +8,34 @@ from dotenv import load_dotenv
 from os import environ
 import os
 import time
-from status import format_progress_bar
-from video import download_video, upload_video
 from pymongo import MongoClient
 
 load_dotenv('config.env', override=True)
 logging.basicConfig(level=logging.INFO)
 
 api_id = os.environ.get('TELEGRAM_API', 22505271)
-if not api_id:
+if len(str(api_id)) == 0:
     logging.error("TELEGRAM_API variable is missing! Exiting now")
     exit(1)
 
 api_hash = os.environ.get('TELEGRAM_HASH', 'c89a94fcfda4bc06524d0903977fc81e')
-if not api_hash:
+if len(api_hash) == 0:
     logging.error("TELEGRAM_HASH variable is missing! Exiting now")
     exit(1)
-
+    
 bot_token = os.environ.get('BOT_TOKEN', '7156255687:AAEXQtlTzE8Jbwt9VD6NLfcZX08Czu7w7gQ')
-if not bot_token:
+if len(bot_token) == 0:
     logging.error("BOT_TOKEN variable is missing! Exiting now")
     exit(1)
-
 dump_id = os.environ.get('DUMP_CHAT_ID', '-1002062925443')
-if not dump_id:
+if len(str(dump_id)) == 0:
     logging.error("DUMP_CHAT_ID variable is missing! Exiting now")
     exit(1)
 else:
     dump_id = int(dump_id)
 
 fsub_id = os.environ.get('FSUB_ID', '-1002108419450')
-if not fsub_id:
+if len(str(fsub_id)) == 0:
     logging.error("FSUB_ID variable is missing! Exiting now")
     exit(1)
 else:
@@ -116,7 +113,7 @@ async def handle_message(client, message: Message):
         logging.error(f"Error handling message: {e}")
         await reply_msg.edit_text("ғᴀɪʟᴇᴅ ᴛᴏ ᴘʀᴏᴄᴇss ʏᴏᴜʀ ʀᴇǫᴜᴇsᴛ.\nɪғ ʏᴏᴜʀ ғɪʟᴇ sɪᴢᴇ ɪs ᴍᴏʀᴇ ᴛʜᴀɴ 120ᴍʙ ɪᴛ ᴍɪɢʜᴛ ғᴀɪʟ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ.")
 
-@app.on_message(filters.command("broadcast") & filters.user(6695586027))  # Replace with your actual user ID to restrict this command
+@app.on_message(filters.command("broadcast") & filters.user(6695586027))  # Replace <your_user_id> with your actual user ID to restrict this command
 async def broadcast_command(client, message):
     if len(message.command) < 2:
         await message.reply_text("Please provide a message to broadcast.")
