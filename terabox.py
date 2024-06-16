@@ -129,12 +129,16 @@ async def start_command(client, message):
         await db_update_verify_status(user_id, {**verify_status, 'is_verified': True, 'verified_time': time.time()})
         await message.reply("Your token has been successfully verified and is valid for 24 hours.")
     elif len(text) > 7 and verify_status["is_verified"]:
-        pass
+        reply_message = f"Welcome, {user_mention}.\n\n🌟 I am a terabox downloader bot. Send me any terabox link and I will download it within a few seconds and send it to you ✨."
+        join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/ultroid_official")
+        developer_button = InlineKeyboardButton("Developer ⚡️", url="https://t.me/ultroidxTeam")
+        reply_markup = InlineKeyboardMarkup([[join_button, developer_button]])
+        await message.reply_text(reply_message, reply_markup=reply_markup)
     else:
         if IS_VERIFY and not verify_status['is_verified']:
             token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
             logging.info(f"Generated token: {token}")
-            link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://telegram.dog/DRM2_bot?start=verify_{token}')
+            link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://telegram.me/DRM2_bot?start=verify_{token}')
             await db_update_verify_status(user_id, {**verify_status, 'verify_token': token, 'link': link})
             message_text = (
                 "Your ads token has expired. Please refresh your token and try again.\n\n"
@@ -143,13 +147,67 @@ async def start_command(client, message):
                 "This is an ads token. If you pass 1 ad, you can use the bot for 24 hours after passing the ad.\n\n"
                 f"[Click here]({link}) to refresh your token."
             )
-            await message.reply(message_text) #, parse_mode='markdownv2')
+            await message.reply(message_text)
 
-    reply_message = f"Welcome, {user_mention}.\n\n🌟 I am a terabox downloader bot. Send me any terabox link and I will download it within a few seconds and send it to you ✨."
-    join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/ultroid_official")
-    developer_button = InlineKeyboardButton("Developer ⚡️", url="https://t.me/ultroidxTeam")
-    reply_markup = InlineKeyboardMarkup([[join_button, developer_button]])
-    await message.reply_text(reply_message, reply_markup=reply_markup)
+
+@app.on_message(filters.command('broadcast') & filters.user(ADMINS))
+async def broadcast_command(client, message):
+    if message.reply_to_message:
+        query = await full_userbase()
+        broadcast_msg = message.reply_to_message
+        total = 0
+        successful = 0
+        blocked = 0
+        deleted = 0
+        unsuccessful = 0
+        
+        pls_wait = await message.reply("<i>Broadcasting Message.. This will Take Some Time</i>")
+        for chat_id in query:
+            try:
+                await broadcast_msg.copy(chat_id)
+                successful += 1
+            except FloodWait as e:
+                await asyncio.sleep(e.x)
+                await broadcast_msg.copy(chat_id)
+                successful += 1
+            except UserIsBlocked:
+                await del_user(chat_id)
+                blocked += 1
+            except InputUserDeactivated:
+                await del_user(chat_id)
+                deleted += 1
+            except:
+                unsuccessful += 1
+                pass
+            total += 1
+        
+        status = f"""<b><u>Broadcast Completed</u></b>
+
+Total Users: <code>{total}</code>
+Successful: <code>{successful}</code>
+Blocked Users: <code>{blocked}</code>
+Deleted Accounts: <code>{deleted}</code>
+Unsuccessful: <code>{unsuccessful}</code>"""
+        
+        await pls_wait.edit(status)
+    else:
+        msg = await message.reply("Please reply to a message to broadcast it.")
+        await asyncio.sleep(8)
+        await msg.delete()
+
+@app.on_message(filters.command("stats") & filters.user(ADMINS))
+async def stats_command(client, message):
+    total_users = users_collection.count_documents({})
+    verified_users = users_collection.count_documents({"verify_status.is_verified": True})
+    unverified_users = total_users - verified_users
+
+    status = f"""<b><u>Verification Stats</u></b>
+
+Total Users: <code>{total_users}</code>
+Verified Users: <code>{verified_users}</code>
+Unverified Users: <code>{unverified_users}</code>"""
+
+    await message.reply(status, parse_mode='html')    
 
 @app.on_message(filters.command("check"))
 async def check_command(client, message):
@@ -219,50 +277,6 @@ async def handle_message(client, message: Message):
         logging.error(f"Error handling message: {e}")
         await reply_msg.edit_text("Failed to process your request.\nIf your file size is more than 120MB, it might fail to download.")
 
-@app.on_message(filters.command('broadcast') & filters.user(ADMINS))
-async def broadcast_command(client, message):
-    if message.reply_to_message:
-        query = await full_userbase()
-        broadcast_msg = message.reply_to_message
-        total = 0
-        successful = 0
-        blocked = 0
-        deleted = 0
-        unsuccessful = 0
-        
-        pls_wait = await message.reply("<i>Broadcasting Message.. This will Take Some Time</i>")
-        for chat_id in query:
-            try:
-                await broadcast_msg.copy(chat_id)
-                successful += 1
-            except FloodWait as e:
-                await asyncio.sleep(e.x)
-                await broadcast_msg.copy(chat_id)
-                successful += 1
-            except UserIsBlocked:
-                await del_user(chat_id)
-                blocked += 1
-            except InputUserDeactivated:
-                await del_user(chat_id)
-                deleted += 1
-            except:
-                unsuccessful += 1
-                pass
-            total += 1
-        
-        status = f"""<b><u>Broadcast Completed</u></b>
-
-Total Users: <code>{total}</code>
-Successful: <code>{successful}</code>
-Blocked Users: <code>{blocked}</code>
-Deleted Accounts: <code>{deleted}</code>
-Unsuccessful: <code>{unsuccessful}</code>"""
-        
-        await pls_wait.edit(status)
-    else:
-        msg = await message.reply("Please reply to a message to broadcast it.")
-        await asyncio.sleep(8)
-        await msg.delete()
 
 if __name__ == "__main__":
     app.run()
