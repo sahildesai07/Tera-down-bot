@@ -64,11 +64,16 @@ IS_VERIFY = os.environ.get("IS_VERIFY", "True")
 TUT_VID = os.environ.get("TUT_VID", "https://t.me/Ultroid_Official/18") # shareus ka tut_vid he 
 
 def save_user(user_id, username):
-    if users_collection.find_one({'user_id': user_id}) is None:
-        users_collection.insert_one({'user_id': user_id, 'username': username})
-        logging.info(f"Saved new user {username} with ID {user_id} to the database.")
-    else:
-        logging.info(f"User {username} with ID {user_id} is already in the database.")
+    try:
+        if users_collection.find_one({'user_id': user_id}) is None:
+            users_collection.insert_one({'user_id': user_id, 'username': username})
+            logging.info(f"Saved new user {username} with ID {user_id} to the database.")
+        else:
+            logging.info(f"User {username} with ID {user_id} is already in the database.")
+    except DuplicateKeyError as e:
+        logging.error(f"DuplicateKeyError: {e}")
+        # Handle the error appropriately, such as updating the existing document or logging the error.
+
 
 app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
