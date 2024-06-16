@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from pyrogram import Client, filters, __version__
 from pyrogram.enums import ChatMemberStatus
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from pyrogram.errors import FloodWait
+from pyrogram.errors import FloodWait , UserIsBlocked, InputUserDeactivated 
 from os import environ
 from status import format_progress_bar
 from video import download_video, upload_video
@@ -133,11 +133,17 @@ async def update_verify_status(user_id, verify_token="", is_verified=False, veri
 @app.on_message(filters.command("start"))
 async def start_command(client, message):
     user_id = message.from_user.id
-    username = message.from_user.username
-    await add_user(user_id)  # Save user to MongoDB if not already present
+    if not await present_user(id):
+        try:
+            await add_user(id)
+        except:
+            pass
+    # user_id = message.from_user.id
+    # username = message.from_user.username
+    # await add_user(user_id)  # Save user to MongoDB if not already present
 
     # Save user to MongoDB
-    save_user(user_id, username)  
+    # save_user(user_id, username)  
 
     sticker_message = await message.reply_sticker("CAACAgIAAxkBAAEYonplzwrczhVu3I6HqPBzro3L2JU6YAACvAUAAj-VzAoTSKpoG9FPRjQE")
     await asyncio.sleep(2)
@@ -230,23 +236,49 @@ async def handle_message(client, message: Message):
 # Broadcast command handler
 @app.on_message(filters.command('broadcast') & filters.user(ADMINS))
 async def broadcast_command(client, message):
-    if len(message.command) < 2:
-        await message.reply_text("Please provide a message to broadcast.")
-        return
+ if message.reply_to_message:
+        query = await full_userbase()
+        broadcast_msg = message.reply_to_message
+        total = 0
+        successful = 0
+        blocked = 0
+        deleted = 0
+        unsuccessful = 0
+        
+        pls_wait = await message.reply("<i>Broadcasting Message.. This will Take Some Time</i>")
+        for chat_id in query:
+            try:
+                await broadcast_msg.copy(chat_id)
+                successful += 1
+            except FloodWait as e:
+                await asyncio.sleep(e.x)
+                await broadcast_msg.copy(chat_id)
+                successful += 1
+            except UserIsBlocked:
+                await del_user(chat_id)
+                blocked += 1
+            except InputUserDeactivated:
+                await del_user(chat_id)
+                deleted += 1
+            except:
+                unsuccessful += 1
+                pass
+            total += 1
+        
+        status = f"""<b><u>Broadcast Completed</u>
 
-    broadcast_message = message.text.split(maxsplit=1)[1]  # Get the message to broadcast
+Total Users: <code>{total}</code>
+Successful: <code>{successful}</code>
+Blocked Users: <code>{blocked}</code>
+Deleted Accounts: <code>{deleted}</code>
+Unsuccessful: <code>{unsuccessful}</code></b>"""
+        
+        return await pls_wait.edit(status)
 
-    users = users_collection.find()
-    for user in users:
-        user_id = user['user_id']
-        try:
-            await client.send_message(user_id, broadcast_message)
-            logging.info(f"Broadcast message sent to user {user_id}.")
-        except Exception as e:
-            logging.error(f"Failed to send broadcast message to user {user_id}: {e}")
-            continue
-
-    await message.reply_text("Broadcast message sent to all users.")
+    else:
+        msg = await message.reply(REPLY_ERROR)
+        await asyncio.sleep(8)
+        await msg.delete()
 
 if __name__ == "__main__":
     app.run()
