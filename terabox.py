@@ -129,21 +129,14 @@ async def update_verify_status(user_id, verify_token="", is_verified=False, veri
     current['link'] = link
     await db_update_verify_status(user_id, current)
 
-# Start command handler
 @app.on_message(filters.command("start"))
 async def start_command(client, message):
     user_id = message.from_user.id
-    if not await present_user(id):
+    if not await present_user(user_id):
         try:
-            await add_user(id)
-        except:
-            pass
-    # user_id = message.from_user.id
-    # username = message.from_user.username
-    # await add_user(user_id)  # Save user to MongoDB if not already present
-
-    # Save user to MongoDB
-    # save_user(user_id, username)  
+            await add_user(user_id)
+        except Exception as e:
+            logging.error(f"Failed to add user {user_id} to the database: {e}")
 
     sticker_message = await message.reply_sticker("CAACAgIAAxkBAAEYonplzwrczhVu3I6HqPBzro3L2JU6YAACvAUAAj-VzAoTSKpoG9FPRjQE")
     await asyncio.sleep(2)
