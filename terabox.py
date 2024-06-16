@@ -8,7 +8,8 @@ import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from pyrogram import Client, filters, __version__
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ChatMemberStatus
+from pyrogram.enums import ChatMemberStatus
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import FloodWait
 from os import environ
 from status import format_progress_bar
