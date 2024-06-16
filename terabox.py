@@ -143,7 +143,7 @@ async def start_command(client, message):
                 "This is an ads token. If you pass 1 ad, you can use the bot for 24 hours after passing the ad.\n\n"
                 f"[Click here]({link}) to refresh your token."
             )
-            await message.reply(message_text, parse_mode='markdownv2')
+            await message.reply(message_text) #, parse_mode='markdownv2')
 
     reply_message = f"Welcome, {user_mention}.\n\n🌟 I am a terabox downloader bot. Send me any terabox link and I will download it within a few seconds and send it to you ✨."
     join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/ultroid_official")
