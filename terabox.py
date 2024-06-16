@@ -7,7 +7,7 @@ import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from pyrogram import Client, filters, __version__
-from pyrogram.enums import ChatMemberStatus , ParseMode
+from pyrogram.enums import ChatMemberStatus #, ParseMode
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import FloodWait , UserIsBlocked, InputUserDeactivated 
 from os import environ
@@ -158,7 +158,7 @@ async def start_command(client, message):
             "This is a verification token. Once verified, you can use the bot for 24 hours.\n\n"
             f"[Click here]({link}) to verify your token."
         )
-        await message.reply(message_text, parse_mode='markdown')
+        await message.reply(message_text)
         return
 
     # If verified, provide regular welcome message and functionality
