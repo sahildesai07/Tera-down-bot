@@ -207,7 +207,7 @@ Total Users: <code>{total_users}</code>
 Verified Users: <code>{verified_users}</code>
 Unverified Users: <code>{unverified_users}</code>"""
 
-    await message.reply(status, parse_mode='html')    
+    await message.reply(status)   
 
 @app.on_message(filters.command("check"))
 async def check_command(client, message):
