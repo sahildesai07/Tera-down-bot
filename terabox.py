@@ -15,20 +15,6 @@ from pymongo import MongoClient
 load_dotenv('config.env', override=True)
 logging.basicConfig(level=logging.INFO)
 
-# MongoDB setup
-mongo_url = os.environ.get('MONGO_URL', 'mongodb+srv://ultroidxTeam:ultroidxTeam@cluster0.gabxs6m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
-client = MongoClient(mongo_url)
-db = client['uphdlust']
-users_collection = db['users']
-
-def save_user(user_id, username):
-    if users_collection.find_one({'user_id': user_id}) is None:
-        users_collection.insert_one({'user_id': user_id, 'username': username})
-        logging.info(f"Saved new user {username} with ID {user_id} to the database.")
-    else:
-        logging.info(f"User {username} with ID {user_id} is already in the database.")
-
-
 api_id = os.environ.get('TELEGRAM_API', 22505271)
 if len(api_id) == 0:
     logging.error("TELEGRAM_API variable is missing! Exiting now")
@@ -56,6 +42,19 @@ if len(fsub_id) == 0:
     exit(1)
 else:
     fsub_id = int(fsub_id)
+
+# MongoDB setup
+mongo_url = os.environ.get('MONGO_URL', 'mongodb+srv://ultroidxTeam:ultroidxTeam@cluster0.gabxs6m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+client = MongoClient(mongo_url)
+db = client['uphdlust']
+users_collection = db['users']
+
+def save_user(user_id, username):
+    if users_collection.find_one({'user_id': user_id}) is None:
+        users_collection.insert_one({'user_id': user_id, 'username': username})
+        logging.info(f"Saved new user {username} with ID {user_id} to the database.")
+    else:
+        logging.info(f"User {username} with ID {user_id} is already in the database.")
 
 app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
@@ -116,8 +115,12 @@ async def handle_message(client, message: Message):
         logging.error(f"Error handling message: {e}")
         await reply_msg.edit_text("ғᴀɪʟᴇᴅ ᴛᴏ ᴘʀᴏᴄᴇss ʏᴏᴜʀ ʀᴇǫᴜᴇsᴛ.\nɪғ ʏᴏᴜʀ ғɪʟᴇ sɪᴢᴇ ɪs ᴍᴏʀᴇ ᴛʜᴀɴ 120ᴍʙ ɪᴛ ᴍɪɢʜᴛ ғᴀɪʟ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ.")
 
-@app.on_message(filters.command("broadcast") & filters.user(<your_user_id>))  # Replace <your_user_id> with your actual user ID to restrict this command
+@app.on_message(filters.command("broadcast") & filters.user(6695586027))  # Replace <your_user_id> with your actual user ID to restrict this command
 async def broadcast_command(client, message):
+    if len(message.command) < 2:
+        await message.reply_text("Please provide a message to broadcast.")
+        return
+
     broadcast_message = message.text.split(maxsplit=1)[1]  # Get the message to broadcast
 
     users = users_collection.find()
