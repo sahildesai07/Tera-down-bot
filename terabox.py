@@ -33,9 +33,9 @@ client = MongoClient(mongo_url)
 db = client['uphdlust']
 users_collection = db['users']
 
-SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "publicearn.com")
-SHORTLINK_API = os.environ.get("SHORTLINK_API", "b323441bc55ef14be63018992134d393a62a9da9")
-VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 86400))  # 24 hours in seconds
+SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "adrinolinks.in")
+SHORTLINK_API = os.environ.get("SHORTLINK_API", "e1a21e54ecd47ac77dcae1c63783ef2baa7ee6c6")
+VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 43200))  # 24 hours in seconds
 IS_VERIFY = os.environ.get("IS_VERIFY", "True") == "True"
 TUT_VID = os.environ.get("TUT_VID", "https://t.me/Ultroid_Official/18")
 
@@ -138,7 +138,7 @@ async def start_command(client, message):
         if IS_VERIFY and not verify_status['is_verified']:
             token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
             logging.info(f"Generated token: {token}")
-            link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://telegram.me/DRM2_bot?start=verify_{token}')
+            link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://t.me/DRM2_bot?start=verify_{token}')
             await db_update_verify_status(user_id, {**verify_status, 'verify_token': token, 'link': link})
             message_text = (
                 "Your ads token has expired. Please refresh your token and try again.\n\n"
