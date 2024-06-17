@@ -33,8 +33,8 @@ client = MongoClient(mongo_url)
 db = client['uphdlust']
 users_collection = db['users']
 
-SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "adrinolinks.in")
-SHORTLINK_API = os.environ.get("SHORTLINK_API", "e1a21e54ecd47ac77dcae1c63783ef2baa7ee6c6")
+SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "just2earn.com")
+SHORTLINK_API = os.environ.get("SHORTLINK_API", "7e100dd62679b6fc9aea48ea106347edad521d7f")
 VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 43200))  # 24 hours in seconds
 IS_VERIFY = os.environ.get("IS_VERIFY", "True") == "True"
 TUT_VID = os.environ.get("TUT_VID", "https://t.me/Ultroid_Official/18")
@@ -220,7 +220,7 @@ async def check_command(client, message):
         expiry_time = get_exp_time(VERIFY_EXPIRE - (time.time() - verify_status['verified_time']))
         await message.reply(f"Your token is verified and valid for {expiry_time}.")
     else:
-        await message.reply("Your token is not verified or has expired.")
+        await message.reply("Your token is not verified or has expired , /start to generate! Verify token....")
 
 async def is_user_member(client, user_id):
     try:
