@@ -22,6 +22,11 @@ load_dotenv('config.env', override=True)
 
 logging.basicConfig(level=logging.INFO)
 
+ADMINS = os.environ.get('ADMINS', '5878078253')
+if len(ADMINS) == 0:
+    logging.error("ADMINS variable is missing! Exiting now")
+    exit(1)
+    
 api_id = os.environ.get('TELEGRAM_API', '24089352')
 if len(api_id) == 0:
     logging.error("TELEGRAM_API variable is missing! Exiting now")
@@ -53,7 +58,7 @@ else:
 
 mongo_url = os.environ.get('MONGO_URL', 'mongodb+srv://ultroidxTeam:ultroidxTeam@cluster0.gabxs6m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
 client = MongoClient(mongo_url)
-db = client['uphdlust']
+db = client['aphdlust']
 users_collection = db['users']
 
 SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "modijiurl.com")
