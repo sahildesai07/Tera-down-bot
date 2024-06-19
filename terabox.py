@@ -22,19 +22,19 @@ load_dotenv('config.env', override=True)
 logging.basicConfig(level=logging.INFO)
 
 ADMINS = [6695586027]  # Ensure ADMINS is a list
-api_id = int(os.environ.get('TELEGRAM_API', '22505271'))
-api_hash = os.environ.get('TELEGRAM_HASH', 'c89a94fcfda4bc06524d0903977fc81e')
-bot_token = os.environ.get('BOT_TOKEN', '7156255687:AAEXQtlTzE8Jbwt9VD6NLfcZX08Czu7w7gQ')
-dump_id = int(os.environ.get('DUMP_CHAT_ID', '-1002062925443'))
-fsub_id = int(os.environ.get('FSUB_ID', '-1002108419450'))
+api_id = int(os.environ.get('TELEGRAM_API', '24089352'))
+api_hash = os.environ.get('TELEGRAM_HASH', 'd8712980f37bab2ba8a1db9a69b2d95a')
+bot_token = os.environ.get('BOT_TOKEN', '7493926455:AAGRBGNiZF2k3mn3lWoKOxq1Q1XcRTfYgU8')
+dump_id = int(os.environ.get('DUMP_CHAT_ID', '-1001862834499'))
+fsub_id = int(os.environ.get('FSUB_ID', '-1001904747613'))
 
 mongo_url = os.environ.get('MONGO_URL', 'mongodb+srv://ultroidxTeam:ultroidxTeam@cluster0.gabxs6m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
 client = MongoClient(mongo_url)
 db = client['uphdlust']
 users_collection = db['users']
 
-SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "just2earn.com")
-SHORTLINK_API = os.environ.get("SHORTLINK_API", "7e100dd62679b6fc9aea48ea106347edad521d7f")
+SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "modijiurl.com")
+SHORTLINK_API = os.environ.get("SHORTLINK_API", "1b69cabcad8a473ca707823d783a0f9ccf7c3583")
 VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 43200))  # 24 hours in seconds
 IS_VERIFY = os.environ.get("IS_VERIFY", "True") == "True"
 TUT_VID = os.environ.get("TUT_VID", "https://t.me/Ultroid_Official/18")
@@ -109,7 +109,7 @@ async def start_command(client, message):
         except Exception as e:
             logging.error(f"Failed to add user {user_id} to the database: {e}")
 
-    sticker_message = await message.reply_sticker("CAACAgIAAxkBAAEYonplzwrczhVu3I6HqPBzro3L2JU6YAACvAUAAj-VzAoTSKpoG9FPRjQE")
+    sticker_message = await message.reply_sticker("CAACAgIAAxkBAAJfrGZy2E8hshoE1ZOqdtjqyZ4t9VpKAAKFAAOmysgMiq1L6Q_-yXw1BA")
     await asyncio.sleep(2)
     await sticker_message.delete()
     user_mention = message.from_user.mention
@@ -127,24 +127,24 @@ async def start_command(client, message):
         if verify_status["verify_token"] != token:
             return await message.reply("Your token is invalid or expired. Try again by clicking /start.")
         await db_update_verify_status(user_id, {**verify_status, 'is_verified': True, 'verified_time': time.time()})
-        await message.reply("Your token has been successfully verified and is valid for 24 hours.")
+        await message.reply("Your token has been successfully verified and is valid for 12 hours.")
     elif len(text) > 7 and verify_status["is_verified"]:
         reply_message = f"Welcome, {user_mention}.\n\n🌟 I am a terabox downloader bot. Send me any terabox link and I will download it within a few seconds and send it to you ✨."
-        join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/ultroid_official")
-        developer_button = InlineKeyboardButton("Developer ⚡️", url="https://t.me/ultroidxTeam")
+        join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/megafilesofficial")
+        developer_button = InlineKeyboardButton("Developer ⚡️", url="https://t.me/ambani_hu")
         reply_markup = InlineKeyboardMarkup([[join_button, developer_button]])
         await message.reply_text(reply_message, reply_markup=reply_markup)
     else:
         if IS_VERIFY and not verify_status['is_verified']:
             token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
             logging.info(f"Generated token: {token}")
-            link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://t.me/DRM2_bot?start=verify_{token}')
+            link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://t.me/Teralinkdownloaderbot?start=verify_{token}')
             await db_update_verify_status(user_id, {**verify_status, 'verify_token': token, 'link': link})
             message_text = (
                 "Your ads token has expired. Please refresh your token and try again.\n\n"
                 f"Token Timeout: {get_exp_time(VERIFY_EXPIRE)}\n\n"
                 "What is the token?\n\n"
-                "This is an ads token. If you pass 1 ad, you can use the bot for 24 hours after passing the ad.\n\n"
+                "This is an ads token. If you pass 1 ad, you can use the bot for 12 hours after passing the ad.\n\n"
                 f"[Click here]({link}) to refresh your token."
             )
             await message.reply(message_text)
@@ -257,7 +257,7 @@ async def handle_message(client, message: Message):
     is_member = await is_user_member(client, user_id)
 
     if not is_member:
-        join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/ultroid_official")
+        join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/megafilesofficial")
         reply_markup = InlineKeyboardMarkup([[join_button]])
         await message.reply_text("You must join my channel to use me.", reply_markup=reply_markup)
         return
