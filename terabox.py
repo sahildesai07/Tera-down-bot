@@ -17,6 +17,7 @@ from video import download_video, upload_video  # Assuming these are custom modu
 from database.database import present_user, add_user, full_userbase, del_user, db_verify_status, db_update_verify_status  # Assuming these are custom modules
 from shortzy import Shortzy  # Assuming this is a custom module
 from pymongo.errors import DuplicateKeyError
+from web import keep_alive
 
 load_dotenv('config.env', override=True)
 
@@ -307,4 +308,5 @@ async def handle_message(client, message: Message):
 
 
 if __name__ == "__main__":
+    keep_alive()
     app.run()
