@@ -19,14 +19,37 @@ from shortzy import Shortzy  # Assuming this is a custom module
 from pymongo.errors import DuplicateKeyError
 
 load_dotenv('config.env', override=True)
+
 logging.basicConfig(level=logging.INFO)
 
-ADMINS = [6695586027]  # Ensure ADMINS is a list
-api_id = int(os.environ.get('TELEGRAM_API', '24089352'))
+api_id = os.environ.get('TELEGRAM_API', '24089352')
+if len(api_id) == 0:
+    logging.error("TELEGRAM_API variable is missing! Exiting now")
+    exit(1)
+
 api_hash = os.environ.get('TELEGRAM_HASH', 'd8712980f37bab2ba8a1db9a69b2d95a')
+if len(api_hash) == 0:
+    logging.error("TELEGRAM_HASH variable is missing! Exiting now")
+    exit(1)
+    
 bot_token = os.environ.get('BOT_TOKEN', '7493926455:AAGRBGNiZF2k3mn3lWoKOxq1Q1XcRTfYgU8')
-dump_id = int(os.environ.get('DUMP_CHAT_ID', '-1001862834499'))
-fsub_id = int(os.environ.get('FSUB_ID', '-1001904747613'))
+if len(bot_token) == 0:
+    logging.error("BOT_TOKEN variable is missing! Exiting now")
+    exit(1)
+dump_id = os.environ.get('DUMP_CHAT_ID', '-1001862834499')
+if len(dump_id) == 0:
+    logging.error("DUMP_CHAT_ID variable is missing! Exiting now")
+    exit(1)
+else:
+    dump_id = int(dump_id)
+
+fsub_id = os.environ.get('FSUB_ID', '-1001904747613')
+if len(fsub_id) == 0:
+    logging.error("FSUB_ID variable is missing! Exiting now")
+    exit(1)
+else:
+    fsub_id = int(fsub_id)
+
 
 mongo_url = os.environ.get('MONGO_URL', 'mongodb+srv://ultroidxTeam:ultroidxTeam@cluster0.gabxs6m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
 client = MongoClient(mongo_url)
