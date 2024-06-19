@@ -13,3 +13,4 @@ pyrofork==2.2.11
 python-dotenv
 gunicorn
 gent
+flask
