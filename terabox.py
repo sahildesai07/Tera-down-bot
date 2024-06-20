@@ -24,33 +24,33 @@ load_dotenv('config.env', override=True)
 
 logging.basicConfig(level=logging.INFO)
 
-ADMINS = os.environ.get('ADMINS', '5878078253')
+ADMINS = os.environ.get('ADMINS', '6094416486')
 if len(ADMINS) == 0:
     logging.error("ADMINS variable is missing! Exiting now")
     exit(1)
     
-api_id = os.environ.get('TELEGRAM_API', '24089352')
+api_id = os.environ.get('TELEGRAM_API', '22421139')
 if len(api_id) == 0:
     logging.error("TELEGRAM_API variable is missing! Exiting now")
     exit(1)
 
-api_hash = os.environ.get('TELEGRAM_HASH', 'd8712980f37bab2ba8a1db9a69b2d95a')
+api_hash = os.environ.get('TELEGRAM_HASH', 'aec62a51ce5c4b106a336d81b20e9c05')
 if len(api_hash) == 0:
     logging.error("TELEGRAM_HASH variable is missing! Exiting now")
     exit(1)
     
-bot_token = os.environ.get('BOT_TOKEN', '7493926455:AAGRBGNiZF2k3mn3lWoKOxq1Q1XcRTfYgU8')
+bot_token = os.environ.get('BOT_TOKEN', '6319534565:AAGgx7JzkFzrVLNprOKqHBuQoIQN69CQfcc')
 if len(bot_token) == 0:
     logging.error("BOT_TOKEN variable is missing! Exiting now")
     exit(1)
-dump_id = os.environ.get('DUMP_CHAT_ID', '-1001862834499')
+dump_id = os.environ.get('DUMP_CHAT_ID', '-1002222899728')
 if len(dump_id) == 0:
     logging.error("DUMP_CHAT_ID variable is missing! Exiting now")
     exit(1)
 else:
     dump_id = int(dump_id)
 
-fsub_id = os.environ.get('FSUB_ID', '-1001904747613')
+fsub_id = os.environ.get('FSUB_ID', '-1002178412016')
 if len(fsub_id) == 0:
     logging.error("FSUB_ID variable is missing! Exiting now")
     exit(1)
@@ -60,11 +60,11 @@ else:
 
 mongo_url = os.environ.get('MONGO_URL', 'mongodb+srv://ultroidxTeam:ultroidxTeam@cluster0.gabxs6m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
 client = MongoClient(mongo_url)
-db = client['aphdlust']
+db = client['nphdlust']
 users_collection = db['users']
 
-SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "modijiurl.com")
-SHORTLINK_API = os.environ.get("SHORTLINK_API", "1b69cabcad8a473ca707823d783a0f9ccf7c3583")
+SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "publicearn.com")
+SHORTLINK_API = os.environ.get("SHORTLINK_API", "50ccecc5ce31bfa5ba734dfdcd1f382f155968b8")
 VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 43200))  # 24 hours in seconds
 IS_VERIFY = os.environ.get("IS_VERIFY", "True") == "True"
 TUT_VID = os.environ.get("TUT_VID", "https://t.me/Ultroid_Official/18")
