@@ -18,6 +18,7 @@ from database.database import present_user, add_user, full_userbase, del_user, d
 from shortzy import Shortzy  # Assuming this is a custom module
 from pymongo.errors import DuplicateKeyError
 from web import keep_alive
+# from config import *
 
 load_dotenv('config.env', override=True)
 
@@ -132,39 +133,55 @@ async def update_verify_status(user_id, verify_token="", is_verified=False, veri
 @app.on_message(filters.command("start"))
 async def start_command(client, message):
     user_id = message.from_user.id
+    user_mention = message.from_user.mention
+    
+    # Check if user is present
     if not await present_user(user_id):
         try:
             await add_user(user_id)
+            logging.info(f"Added user {user_id} to the database")
         except Exception as e:
             logging.error(f"Failed to add user {user_id} to the database: {e}")
 
+    # Send sticker and delete it after 2 seconds
     sticker_message = await message.reply_sticker("CAACAgIAAxkBAAJfrGZy2E8hshoE1ZOqdtjqyZ4t9VpKAAKFAAOmysgMiq1L6Q_-yXw1BA")
     await asyncio.sleep(2)
     await sticker_message.delete()
-    user_mention = message.from_user.mention
 
+    # Get verification status
     verify_status = await db_verify_status(user_id)
     logging.info(f"Verify status for user {user_id}: {verify_status}")
 
+    # Check verification expiration
     if verify_status["is_verified"] and VERIFY_EXPIRE < (time.time() - verify_status["verified_time"]):
         await db_update_verify_status(user_id, {**verify_status, 'is_verified': False})
+        verify_status['is_verified'] = False
+        logging.info(f"Verification expired for user {user_id}")
 
     text = message.text
     if "verify_" in text:
         _, token = text.split("_", 1)
         logging.info(f"Extracted token: {token}")
         if verify_status["verify_token"] != token:
+            logging.warning(f"Invalid or expired token for user {user_id}")
             return await message.reply("Your token is invalid or expired. Try again by clicking /start.")
         await db_update_verify_status(user_id, {**verify_status, 'is_verified': True, 'verified_time': time.time()})
-        await message.reply("Your token has been successfully verified and is valid for 12 hours.")
-    elif len(text) > 7 and verify_status["is_verified"]:
-        reply_message = f"Welcome, {user_mention}.\n\n🌟 I am a terabox downloader bot. Send me any terabox link and I will download it within a few seconds and send it to you ✨."
+        logging.info(f"User {user_id} verified successfully")
+        return await message.reply("Your token has been successfully verified and is valid for 12 hours.")
+
+    if verify_status["is_verified"]:
+        logging.info(f"User {user_id} is verified")
+        reply_message = (
+            f"Welcome, {user_mention}.\n\n"
+            "🌟 I am a terabox downloader bot. Send me any terabox link and I will download it within a few seconds and send it to you ✨."
+        )
         join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/megafilesofficial")
         developer_button = InlineKeyboardButton("Developer ⚡️", url="https://t.me/ambani_hu")
         reply_markup = InlineKeyboardMarkup([[join_button, developer_button]])
         await message.reply_text(reply_message, reply_markup=reply_markup)
     else:
-        if IS_VERIFY and not verify_status['is_verified']:
+        logging.info(f"User {user_id} is not verified or has expired token")
+        if IS_VERIFY:
             token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
             logging.info(f"Generated token: {token}")
             link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://t.me/Teralinkdownloaderbot?start=verify_{token}')
@@ -174,9 +191,13 @@ async def start_command(client, message):
                 f"Token Timeout: {get_exp_time(VERIFY_EXPIRE)}\n\n"
                 "What is the token?\n\n"
                 "This is an ads token. If you pass 1 ad, you can use the bot for 12 hours after passing the ad.\n\n"
-                f"[Click here]({link}) to refresh your token."
             )
-            await message.reply(message_text)
+            token_button = InlineKeyboardButton("Get Token", url=link)
+            tutorial_button = InlineKeyboardButton("How to Verify", url="https://yourtutoriallink.com")
+            reply_markup = InlineKeyboardMarkup([[token_button], [tutorial_button]])
+            await message.reply_text(message_text, reply_markup=reply_markup)
+        else:
+            logging.warning(f"Verification is not enabled or user {user_id} does not need verification")
 
 
 @app.on_message(filters.command('broadcast') & filters.user(ADMINS))
