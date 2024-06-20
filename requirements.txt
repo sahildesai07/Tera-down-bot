@@ -1,4 +1,4 @@
-aria2
+aria2p
 pyrogram
 pymongo
 motor
