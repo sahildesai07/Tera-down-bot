@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   app:
-    container_name: jet-terabox
+    container_name: uxb-terabox
     build:
       context: .
       dockerfile: Dockerfile
