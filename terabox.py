@@ -39,7 +39,7 @@ if len(api_hash) == 0:
     logging.error("TELEGRAM_HASH variable is missing! Exiting now")
     exit(1)
     
-bot_token = os.environ.get('BOT_TOKEN', '6319534565:AAGgx7JzkFzrVLNprOKqHBuQoIQN69CQfcc')
+bot_token = os.environ.get('BOT_TOKEN', '')
 if len(bot_token) == 0:
     logging.error("BOT_TOKEN variable is missing! Exiting now")
     exit(1)
