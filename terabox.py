@@ -39,18 +39,18 @@ if len(api_hash) == 0:
     logging.error("TELEGRAM_HASH variable is missing! Exiting now")
     exit(1)
     
-bot_token = os.environ.get('BOT_TOKEN', '7493926455:AAGRBGNiZF2k3mn3lWoKOxq1Q1XcRTfYgU8')
+bot_token = os.environ.get('BOT_TOKEN', '7156255687:AAEXQtlTzE8Jbwt9VD6NLfcZX08Czu7w7gQ')
 if len(bot_token) == 0:
     logging.error("BOT_TOKEN variable is missing! Exiting now")
     exit(1)
-dump_id = os.environ.get('DUMP_CHAT_ID', '-1001862834499')
+dump_id = os.environ.get('DUMP_CHAT_ID', '-1002062925443')
 if len(dump_id) == 0:
     logging.error("DUMP_CHAT_ID variable is missing! Exiting now")
     exit(1)
 else:
     dump_id = int(dump_id)
 
-fsub_id = os.environ.get('FSUB_ID', '-1001904747613')
+fsub_id = os.environ.get('FSUB_ID', '-1002108419450')
 if len(fsub_id) == 0:
     logging.error("FSUB_ID variable is missing! Exiting now")
     exit(1)
@@ -60,11 +60,11 @@ else:
 
 mongo_url = os.environ.get('MONGO_URL', 'mongodb+srv://ultroidxTeam:ultroidxTeam@cluster0.gabxs6m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
 client = MongoClient(mongo_url)
-db = client['aphdlust']
+db = client['uphdlust']
 users_collection = db['users']
 
-SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "modijiurl.com")
-SHORTLINK_API = os.environ.get("SHORTLINK_API", "1b69cabcad8a473ca707823d783a0f9ccf7c3583")
+SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "just2earn.com")
+SHORTLINK_API = os.environ.get("SHORTLINK_API", "7e100dd62679b6fc9aea48ea106347edad521d7f")
 VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 43200))  # 24 hours in seconds
 IS_VERIFY = os.environ.get("IS_VERIFY", "True") == "True"
 TUT_VID = os.environ.get("TUT_VID", "https://t.me/ultroid_official/18")
@@ -334,7 +334,6 @@ async def handle_message(client, message: Message):
     except Exception as e:
         logging.error(f"Error handling message: {e}")
         await reply_msg.edit_text("Failed to process your request.\nIf your file size is more than 120MB, it might fail to download.\n simpely your other link , it's stuck sometimes")
-
 
 
 if __name__ == "__main__":
