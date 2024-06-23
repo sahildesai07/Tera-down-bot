@@ -143,9 +143,9 @@ async def start_command(client, message):
         except Exception as e:
             logging.error(f"Failed to add user {user_id} to the database: {e}")
 
-    # Send sticker and delete it after 1.5 seconds
+    # Send sticker and delete it after 2 seconds
     sticker_message = await message.reply_sticker("CAACAgIAAxkBAAJfrGZy2E8hshoE1ZOqdtjqyZ4t9VpKAAKFAAOmysgMiq1L6Q_-yXw1BA")
-    await asyncio.sleep(1.5).
+    await asyncio.sleep(2).
     await sticker_message.delete()
 
     # Get verification status
