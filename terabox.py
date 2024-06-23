@@ -24,34 +24,34 @@ load_dotenv('config.env', override=True)
 
 logging.basicConfig(level=logging.INFO)
 
-ADMINS = os.environ.get('ADMINS', '6695586027')
-if len(ADMINS) == 0:
+ADMINS = list(map(int, os.environ.get('ADMINS', '6695586027').split()))
+if not ADMINS:
     logging.error("ADMINS variable is missing! Exiting now")
     exit(1)
     
 api_id = os.environ.get('TELEGRAM_API', '22505271')
-if len(api_id) == 0:
+if not api_id:
     logging.error("TELEGRAM_API variable is missing! Exiting now")
     exit(1)
 
 api_hash = os.environ.get('TELEGRAM_HASH', 'c89a94fcfda4bc06524d0903977fc81e')
-if len(api_hash) == 0:
+if not api_hash:
     logging.error("TELEGRAM_HASH variable is missing! Exiting now")
     exit(1)
     
 bot_token = os.environ.get('BOT_TOKEN', '7156255687:AAEXQtlTzE8Jbwt9VD6NLfcZX08Czu7w7gQ')
-if len(bot_token) == 0:
+if not bot_token:
     logging.error("BOT_TOKEN variable is missing! Exiting now")
     exit(1)
 dump_id = os.environ.get('DUMP_CHAT_ID', '-1002062925443')
-if len(dump_id) == 0:
+if not dump_id:
     logging.error("DUMP_CHAT_ID variable is missing! Exiting now")
     exit(1)
 else:
     dump_id = int(dump_id)
 
 fsub_id = os.environ.get('FSUB_ID', '-1002108419450')
-if len(fsub_id) == 0:
+if not fsub_id:
     logging.error("FSUB_ID variable is missing! Exiting now")
     exit(1)
 else:
@@ -212,7 +212,8 @@ async def broadcast_command(client, message):
         unsuccessful = 0
         
         pls_wait = await message.reply("<i>Broadcasting Message.. This will Take Some Time</i>")
-        for chat_id in query:
+        for user in query:
+            chat_id = user['user_id']
             try:
                 await broadcast_msg.copy(chat_id)
                 successful += 1
@@ -226,9 +227,9 @@ async def broadcast_command(client, message):
             except InputUserDeactivated:
                 await del_user(chat_id)
                 deleted += 1
-            except:
+            except Exception as e:
+                logging.error(f"Failed to send broadcast to {chat_id}: {e}")
                 unsuccessful += 1
-                pass
             total += 1
         
         status = f"""<b><u>Broadcast Completed</u></b>
@@ -248,7 +249,13 @@ Unsuccessful: <code>{unsuccessful}</code>"""
 @app.on_message(filters.command("stats") & filters.user(ADMINS))
 async def stats_command(client, message):
     total_users = users_collection.count_documents({})
-    verified_users = users_collection.count_documents({"is_verified": True})
+    verified_users = 0
+    
+    async for user in users_collection.find({}):
+        verify_status = await db_verify_status(user['user_id'])
+        if verify_status['is_verified']:
+            verified_users += 1
+
     unverified_users = total_users - verified_users
 
     status = f"""<b><u>Verification Stats</u></b>
@@ -338,4 +345,3 @@ async def handle_message(client, message):
 if __name__ == "__main__":
     keep_alive()
     app.run()
-    
