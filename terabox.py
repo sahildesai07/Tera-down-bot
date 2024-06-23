@@ -67,7 +67,7 @@ SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "just2earn.com")
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "7e100dd62679b6fc9aea48ea106347edad521d7f")
 VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 43200))  # 24 hours in seconds
 IS_VERIFY = os.environ.get("IS_VERIFY", "True") == "True"
-TUT_VID = os.environ.get("TUT_VID", "https://t.me/ultroid_official/18")
+TUT_VID = os.environ.get("TUT_VID", "https://t.me/Digital_Heaven_Team/61")
 
 def save_user(user_id, username):
     try:
@@ -193,7 +193,7 @@ async def start_command(client, message):
                 "This is an ads token. If you pass 1 ad, you can use the bot for 12 hours after passing the ad.\n\n"
             )
             token_button = InlineKeyboardButton("Get Token", url=link)
-            tutorial_button = InlineKeyboardButton("How to Verify", url="https://t.me/ultroid_official/18")
+            tutorial_button = InlineKeyboardButton("How to Verify", url="https://t.me/Digital_Heaven_Team/61")
             reply_markup = InlineKeyboardMarkup([[token_button], [tutorial_button]])
             await message.reply_text(message_text, reply_markup=reply_markup)
         else:
