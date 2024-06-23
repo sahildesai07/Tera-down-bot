@@ -185,7 +185,7 @@ async def start_command(client, message):
             token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
             logging.info(f"Generated token: {token}")
             link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://t.me/DRM2_bot?start=verify_{token}')
-            await db_update_verify_status(user_id, token, False, 0, link)
+            await db_update_verify_status(user_id, {**verify_status, 'verify_token': token, 'link': link})
             message_text = (
                 "Your ads token has expired. Please refresh your token and try again.\n\n"
                 f"Token Timeout: {get_exp_time(VERIFY_EXPIRE)}\n\n"
