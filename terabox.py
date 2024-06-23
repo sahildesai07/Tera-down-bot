@@ -143,9 +143,9 @@ async def start_command(client, message):
         except Exception as e:
             logging.error(f"Failed to add user {user_id} to the database: {e}")
 
-    # Send sticker and delete it after 1.5 seconds
+    # Send sticker and delete it after 2 seconds
     sticker_message = await message.reply_sticker("CAACAgIAAxkBAAJfrGZy2E8hshoE1ZOqdtjqyZ4t9VpKAAKFAAOmysgMiq1L6Q_-yXw1BA")
-    await asyncio.sleep(1.5)
+    await asyncio.sleep(1.8)
     await sticker_message.delete()
 
     # Get verification status
@@ -154,7 +154,7 @@ async def start_command(client, message):
 
     # Check verification expiration
     if verify_status["is_verified"] and VERIFY_EXPIRE < (time.time() - verify_status["verified_time"]):
-        await db_update_verify_status(user_id, verify_status['verify_token'], False, 0, verify_status['link'])
+        await db_update_verify_status(user_id, {**verify_status, 'is_verified': False})
         verify_status['is_verified'] = False
         logging.info(f"Verification expired for user {user_id}")
 
@@ -165,7 +165,7 @@ async def start_command(client, message):
         if verify_status["verify_token"] != token:
             logging.warning(f"Invalid or expired token for user {user_id}")
             return await message.reply("Your token is invalid or expired. Try again by clicking /start.")
-        await db_update_verify_status(user_id, verify_status['verify_token'], True, time.time(), verify_status['link'])
+        await db_update_verify_status(user_id, {**verify_status, 'is_verified': True, 'verified_time': time.time()})
         logging.info(f"User {user_id} verified successfully")
         return await message.reply("Your token has been successfully verified and is valid for 12 hours.")
 
@@ -247,21 +247,8 @@ Unsuccessful: <code>{unsuccessful}</code>"""
 
 @app.on_message(filters.command("stats") & filters.user(ADMINS))
 async def stats_command(client, message):
-    # Synchronous call to count_documents
     total_users = users_collection.count_documents({})
-
-    verified_users = 0
-
-    # Use synchronous iteration over the cursor
-    cursor = users_collection.find({})
-    for user in cursor:
-        if 'user_id' in user:
-            verify_status = await db_verify_status(user['user_id'])
-            if verify_status['is_verified']:
-                verified_users += 1
-        else:
-            logging.error(f"Document without 'user_id': {user}")
-
+    verified_users = users_collection.count_documents({"verify_status.is_verified": True})
     unverified_users = total_users - verified_users
 
     status = f"""<b><u>Verification Stats</u></b>
@@ -270,9 +257,7 @@ Total Users: <code>{total_users}</code>
 Verified Users: <code>{verified_users}</code>
 Unverified Users: <code>{unverified_users}</code>"""
 
-    await message.reply(status)
-
-
+    await message.reply(status)   
 
 @app.on_message(filters.command("check"))
 async def check_command(client, message):
@@ -285,7 +270,7 @@ async def check_command(client, message):
         expiry_time = get_exp_time(VERIFY_EXPIRE - (time.time() - verify_status['verified_time']))
         await message.reply(f"Your token is verified and valid for {expiry_time}.")
     else:
-        await message.reply("Your token is not verified or has expired. Please use /start to generate and verify a new token.")
+        await message.reply("Your token is not verified or has expired , /start to generate! Verify token....")
 
 async def is_user_member(client, user_id):
     try:
@@ -314,22 +299,12 @@ async def handle_message(client, message: Message):
     user_mention = message.from_user.mention
     
     verify_status = await db_verify_status(user_id)
-    
-    # Get verification status
-    verify_status = await db_verify_status(user_id)
-    logging.info(f"Verify status for user {user_id}: {verify_status}")
-
-    # Check verification expiration
-    if verify_status["is_verified"] and VERIFY_EXPIRE < (time.time() - verify_status["verified_time"]):
-        await db_update_verify_status(user_id, verify_status['verify_token'], False, 0, verify_status['link'])
-        verify_status['is_verified'] = False
-        logging.info(f"Verification expired for user {user_id}")
 
     if not verify_status["is_verified"]:
         await message.reply_text("To use this bot, please verify your identity. Click /start to begin.")
         return
 
-        is_member = await is_user_member(client, user_id)
+    is_member = await is_user_member(client, user_id)
 
     if not is_member:
         join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/ultroid_official")
@@ -350,7 +325,8 @@ async def handle_message(client, message: Message):
         await upload_video(client, file_path, thumbnail_path, video_title, reply_msg, dump_id, user_mention, user_id, message)
     except Exception as e:
         logging.error(f"Error handling message: {e}")
-        await reply_msg.edit_text("Failed to process your request.\nIf your file size is more than 120MB, it might fail to download. \nPlease try another link, it sometimes gets stuck.")
+        await reply_msg.edit_text("Failed to process your request.\nIf your file size is more than 120MB, it might fail to download.")
+
 
 if __name__ == "__main__":
     keep_alive()
