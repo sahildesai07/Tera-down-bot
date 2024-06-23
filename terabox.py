@@ -65,7 +65,7 @@ users_collection = db['users']
 
 SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "just2earn.com")
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "7e100dd62679b6fc9aea48ea106347edad521d7f")
-VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 43200))  # 24 hours in seconds
+VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 43200))  # 12 hours in seconds
 IS_VERIFY = os.environ.get("IS_VERIFY", "True") == "True"
 TUT_VID = os.environ.get("TUT_VID", "https://t.me/Digital_Heaven_Team/61")
 
@@ -154,7 +154,7 @@ async def start_command(client, message):
 
     # Check verification expiration
     if verify_status["is_verified"] and VERIFY_EXPIRE < (time.time() - verify_status["verified_time"]):
-        await db_update_verify_status(user_id, {**verify_status, 'is_verified': False})
+        await db_update_verify_status(user_id, verify_status['verify_token'], False, 0, verify_status['link'])
         verify_status['is_verified'] = False
         logging.info(f"Verification expired for user {user_id}")
 
@@ -165,7 +165,7 @@ async def start_command(client, message):
         if verify_status["verify_token"] != token:
             logging.warning(f"Invalid or expired token for user {user_id}")
             return await message.reply("Your token is invalid or expired. Try again by clicking /start.")
-        await db_update_verify_status(user_id, {**verify_status, 'is_verified': True, 'verified_time': time.time()})
+        await db_update_verify_status(user_id, verify_status['verify_token'], True, time.time(), verify_status['link'])
         logging.info(f"User {user_id} verified successfully")
         return await message.reply("Your token has been successfully verified and is valid for 12 hours.")
 
@@ -185,7 +185,7 @@ async def start_command(client, message):
             token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
             logging.info(f"Generated token: {token}")
             link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://t.me/DRM2_bot?start=verify_{token}')
-            await db_update_verify_status(user_id, {**verify_status, 'verify_token': token, 'link': link})
+            await db_update_verify_status(user_id, token, False, 0, link)
             message_text = (
                 "Your ads token has expired. Please refresh your token and try again.\n\n"
                 f"Token Timeout: {get_exp_time(VERIFY_EXPIRE)}\n\n"
@@ -248,7 +248,7 @@ Unsuccessful: <code>{unsuccessful}</code>"""
 @app.on_message(filters.command("stats") & filters.user(ADMINS))
 async def stats_command(client, message):
     total_users = users_collection.count_documents({})
-    verified_users = users_collection.count_documents({"verify_status.is_verified": True})
+    verified_users = users_collection.count_documents({"is_verified": True})
     unverified_users = total_users - verified_users
 
     status = f"""<b><u>Verification Stats</u></b>
@@ -270,7 +270,7 @@ async def check_command(client, message):
         expiry_time = get_exp_time(VERIFY_EXPIRE - (time.time() - verify_status['verified_time']))
         await message.reply(f"Your token is verified and valid for {expiry_time}.")
     else:
-        await message.reply("Your token is not verified or has expired , /start to generate! Verify token....")
+        await message.reply("Your token is not verified or has expired. Please use /start to generate and verify a new token.")
 
 async def is_user_member(client, user_id):
     try:
@@ -304,7 +304,7 @@ async def handle_message(client, message):
 
     # Check verification expiration
     if verify_status["is_verified"] and VERIFY_EXPIRE < (time.time() - verify_status["verified_time"]):
-        await db_update_verify_status(user_id, {**verify_status, 'is_verified': False})
+        await db_update_verify_status(user_id, verify_status['verify_token'], False, 0, verify_status['link'])
         verify_status['is_verified'] = False
         logging.info(f"Verification expired for user {user_id}")
 
@@ -333,9 +333,9 @@ async def handle_message(client, message):
         await upload_video(client, file_path, thumbnail_path, video_title, reply_msg, dump_id, user_mention, user_id, message)
     except Exception as e:
         logging.error(f"Error handling message: {e}")
-        await reply_msg.edit_text("Failed to process your request.\nIf your file size is more than 120MB, it might fail to download.\n simpely your other link , it's stuck sometimes")
-
+        await reply_msg.edit_text("Failed to process your request.\nIf your file size is more than 120MB, it might fail to download. Please try another link, it sometimes gets stuck.")
 
 if __name__ == "__main__":
     keep_alive()
     app.run()
+    
