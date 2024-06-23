@@ -256,9 +256,12 @@ async def stats_command(client, message):
     # Use synchronous iteration over the cursor
     cursor = users_collection.find({})
     for user in cursor:
-        verify_status = await db_verify_status(user['user_id'])
-        if verify_status['is_verified']:
-            verified_users += 1
+        if 'user_id' in user:
+            verify_status = await db_verify_status(user['user_id'])
+            if verify_status['is_verified']:
+                verified_users += 1
+        else:
+            logging.error(f"Document without 'user_id': {user}")
 
     unverified_users = total_users - verified_users
 
