@@ -248,10 +248,12 @@ Unsuccessful: <code>{unsuccessful}</code>"""
 
 @app.on_message(filters.command("stats") & filters.user(ADMINS))
 async def stats_command(client, message):
-    total_users = users_collection.count_documents({})
+    total_users = await users_collection.count_documents({})
     verified_users = 0
     
-    async for user in users_collection.find({}):
+    # Use synchronous iteration over the cursor
+    cursor = users_collection.find({})
+    for user in cursor:
         verify_status = await db_verify_status(user['user_id'])
         if verify_status['is_verified']:
             verified_users += 1
@@ -264,7 +266,8 @@ Total Users: <code>{total_users}</code>
 Verified Users: <code>{verified_users}</code>
 Unverified Users: <code>{unverified_users}</code>"""
 
-    await message.reply(status)   
+    await message.reply(status)
+
 
 @app.on_message(filters.command("check"))
 async def check_command(client, message):
