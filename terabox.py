@@ -24,17 +24,17 @@ load_dotenv('config.env', override=True)
 
 logging.basicConfig(level=logging.INFO)
 
-ADMINS = os.environ.get('ADMINS', '5878078253')
+ADMINS = os.environ.get('ADMINS', '6695586027')
 if len(ADMINS) == 0:
     logging.error("ADMINS variable is missing! Exiting now")
     exit(1)
     
-api_id = os.environ.get('TELEGRAM_API', '24089352')
+api_id = os.environ.get('TELEGRAM_API', '22505271')
 if len(api_id) == 0:
     logging.error("TELEGRAM_API variable is missing! Exiting now")
     exit(1)
 
-api_hash = os.environ.get('TELEGRAM_HASH', 'd8712980f37bab2ba8a1db9a69b2d95a')
+api_hash = os.environ.get('TELEGRAM_HASH', 'c89a94fcfda4bc06524d0903977fc81e')
 if len(api_hash) == 0:
     logging.error("TELEGRAM_HASH variable is missing! Exiting now")
     exit(1)
@@ -67,7 +67,7 @@ SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "modijiurl.com")
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "1b69cabcad8a473ca707823d783a0f9ccf7c3583")
 VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 43200))  # 24 hours in seconds
 IS_VERIFY = os.environ.get("IS_VERIFY", "True") == "True"
-TUT_VID = os.environ.get("TUT_VID", "https://t.me/howto_openurllink")
+TUT_VID = os.environ.get("TUT_VID", "https://t.me/ultroid_official/18")
 
 def save_user(user_id, username):
     try:
@@ -143,9 +143,9 @@ async def start_command(client, message):
         except Exception as e:
             logging.error(f"Failed to add user {user_id} to the database: {e}")
 
-    # Send sticker and delete it after 2 seconds
+    # Send sticker and delete it after 1.5 seconds
     sticker_message = await message.reply_sticker("CAACAgIAAxkBAAJfrGZy2E8hshoE1ZOqdtjqyZ4t9VpKAAKFAAOmysgMiq1L6Q_-yXw1BA")
-    await asyncio.sleep(2)
+    await asyncio.sleep(1.5).
     await sticker_message.delete()
 
     # Get verification status
@@ -175,8 +175,8 @@ async def start_command(client, message):
             f"Welcome, {user_mention}.\n\n"
             "🌟 I am a terabox downloader bot. Send me any terabox link and I will download it within a few seconds and send it to you ✨."
         )
-        join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/megafilesofficial")
-        developer_button = InlineKeyboardButton("Developer ⚡️", url="https://t.me/ambani_hu")
+        join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/ultroid_official")
+        developer_button = InlineKeyboardButton("Developer ⚡️", url="https://t.me/ultroidxTeam")
         reply_markup = InlineKeyboardMarkup([[join_button, developer_button]])
         await message.reply_text(reply_message, reply_markup=reply_markup)
     else:
@@ -184,7 +184,7 @@ async def start_command(client, message):
         if IS_VERIFY:
             token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
             logging.info(f"Generated token: {token}")
-            link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://t.me/Teralinkdownloaderbot?start=verify_{token}')
+            link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://t.me/DRM2_bot?start=verify_{token}')
             await db_update_verify_status(user_id, {**verify_status, 'verify_token': token, 'link': link})
             message_text = (
                 "Your ads token has expired. Please refresh your token and try again.\n\n"
@@ -193,7 +193,7 @@ async def start_command(client, message):
                 "This is an ads token. If you pass 1 ad, you can use the bot for 12 hours after passing the ad.\n\n"
             )
             token_button = InlineKeyboardButton("Get Token", url=link)
-            tutorial_button = InlineKeyboardButton("How to Verify", url="https://t.me/howto_openurllink")
+            tutorial_button = InlineKeyboardButton("How to Verify", url="https://t.me/ultroid_official/18")
             reply_markup = InlineKeyboardMarkup([[token_button], [tutorial_button]])
             await message.reply_text(message_text, reply_markup=reply_markup)
         else:
@@ -298,7 +298,15 @@ async def handle_message(client, message: Message):
 
     user_mention = message.from_user.mention
     
+    # Get verification status
     verify_status = await db_verify_status(user_id)
+    logging.info(f"Verify status for user {user_id}: {verify_status}")
+
+    # Check verification expiration
+    if verify_status["is_verified"] and VERIFY_EXPIRE < (time.time() - verify_status["verified_time"]):
+        await db_update_verify_status(user_id, {**verify_status, 'is_verified': False})
+        verify_status['is_verified'] = False
+        logging.info(f"Verification expired for user {user_id}")
 
     if not verify_status["is_verified"]:
         await message.reply_text("To use this bot, please verify your identity. Click /start to begin.")
@@ -307,7 +315,7 @@ async def handle_message(client, message: Message):
     is_member = await is_user_member(client, user_id)
 
     if not is_member:
-        join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/megafilesofficial")
+        join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/ultroid_official")
         reply_markup = InlineKeyboardMarkup([[join_button]])
         await message.reply_text("You must join my channel to use me.", reply_markup=reply_markup)
         return
@@ -325,7 +333,8 @@ async def handle_message(client, message: Message):
         await upload_video(client, file_path, thumbnail_path, video_title, reply_msg, dump_id, user_mention, user_id, message)
     except Exception as e:
         logging.error(f"Error handling message: {e}")
-        await reply_msg.edit_text("Failed to process your request.\nIf your file size is more than 120MB, it might fail to download.")
+        await reply_msg.edit_text("Failed to process your request.\nIf your file size is more than 120MB, it might fail to download.\n simpely your other link , it's stuck sometimes")
+
 
 
 if __name__ == "__main__":
