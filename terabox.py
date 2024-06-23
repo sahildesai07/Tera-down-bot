@@ -248,9 +248,11 @@ Unsuccessful: <code>{unsuccessful}</code>"""
 
 @app.on_message(filters.command("stats") & filters.user(ADMINS))
 async def stats_command(client, message):
-    total_users = await users_collection.count_documents({})
+    # Synchronous call to count_documents
+    total_users = users_collection.count_documents({})
+
     verified_users = 0
-    
+
     # Use synchronous iteration over the cursor
     cursor = users_collection.find({})
     for user in cursor:
@@ -267,6 +269,7 @@ Verified Users: <code>{verified_users}</code>
 Unverified Users: <code>{unverified_users}</code>"""
 
     await message.reply(status)
+
 
 
 @app.on_message(filters.command("check"))
