@@ -212,8 +212,7 @@ async def broadcast_command(client, message):
         unsuccessful = 0
         
         pls_wait = await message.reply("<i>Broadcasting Message.. This will Take Some Time</i>")
-        for user in query:
-            chat_id = user['user_id']
+        for chat_id in query:
             try:
                 await broadcast_msg.copy(chat_id)
                 successful += 1
@@ -227,9 +226,9 @@ async def broadcast_command(client, message):
             except InputUserDeactivated:
                 await del_user(chat_id)
                 deleted += 1
-            except Exception as e:
-                logging.error(f"Failed to send broadcast to {chat_id}: {e}")
+            except:
                 unsuccessful += 1
+                pass
             total += 1
         
         status = f"""<b><u>Broadcast Completed</u></b>
@@ -304,7 +303,7 @@ def is_terabox_link(link):
     return "terabox" in link
 
 @app.on_message(filters.text)
-async def handle_message(client, message):
+async def handle_message(client, message: Message):
     user_id = message.from_user.id
     if not await present_user(user_id):
         try:
@@ -313,6 +312,8 @@ async def handle_message(client, message):
             logging.error(f"Failed to add user {user_id} to the database: {e}")
 
     user_mention = message.from_user.mention
+    
+    verify_status = await db_verify_status(user_id)
     
     # Get verification status
     verify_status = await db_verify_status(user_id)
@@ -328,7 +329,7 @@ async def handle_message(client, message):
         await message.reply_text("To use this bot, please verify your identity. Click /start to begin.")
         return
 
-    is_member = await is_user_member(client, user_id)
+        is_member = await is_user_member(client, user_id)
 
     if not is_member:
         join_button = InlineKeyboardButton("Join ❤️🚀", url="https://t.me/ultroid_official")
@@ -349,7 +350,7 @@ async def handle_message(client, message):
         await upload_video(client, file_path, thumbnail_path, video_title, reply_msg, dump_id, user_mention, user_id, message)
     except Exception as e:
         logging.error(f"Error handling message: {e}")
-        await reply_msg.edit_text("Failed to process your request.\nIf your file size is more than 120MB, it might fail to download. Please try another link, it sometimes gets stuck.")
+        await reply_msg.edit_text("Failed to process your request.\nIf your file size is more than 120MB, it might fail to download. \nPlease try another link, it sometimes gets stuck.")
 
 if __name__ == "__main__":
     keep_alive()
