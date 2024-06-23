@@ -300,6 +300,12 @@ async def handle_message(client, message: Message):
     
     verify_status = await db_verify_status(user_id)
 
+    # Check verification expiration
+    if verify_status["is_verified"] and VERIFY_EXPIRE < (time.time() - verify_status["verified_time"]):
+        await db_update_verify_status(user_id, {**verify_status, 'is_verified': False})
+        verify_status['is_verified'] = False
+        logging.info(f"Verification expired for user {user_id}")
+
     if not verify_status["is_verified"]:
         await message.reply_text("To use this bot, please verify your identity. Click /start to begin.")
         return
