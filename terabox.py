@@ -288,7 +288,7 @@ def is_terabox_link(link):
     return "terabox" in link
 
 @app.on_message(filters.text)
-async def handle_message(client, message: Message):
+async def handle_message(client, message):
     user_id = message.from_user.id
     if not await present_user(user_id):
         try:
