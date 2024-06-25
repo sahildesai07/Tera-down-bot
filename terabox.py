@@ -60,7 +60,7 @@ else:
 
 mongo_url = os.environ.get('MONGO_URL', 'mongodb+srv://ultroidxTeam:ultroidxTeam@cluster0.gabxs6m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
 client = MongoClient(mongo_url)
-db = client['yphdlust']
+db = client['aphdlust']
 users_collection = db['users']
 
 
