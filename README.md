@@ -1,4 +1,3 @@
-This is a Telegram Bot written in Python for Downloading Videos From Terabox.
 
 Terabox API/Base Code [**HERE**](https://t.me/ultroidxTeam/7212).
 
@@ -13,7 +12,3 @@ Terabox API/Base Code [**HERE**](https://t.me/ultroidxTeam/7212).
  Telegram : [@ultroidxTeam](https://Telegram.dog/ultroidxTeam)
 ---
 
-## Deploy using CLI
-
-- Deployment instructions uploaded [**HERE**](https://gist.github.com/Hrishi2861/3f04a05b4d86241a454bd284ed1c3dee)
-- Carefully copy-paste every CMD one by one. If you miss maybe your BOT will not run.
