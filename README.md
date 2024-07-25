@@ -55,7 +55,7 @@ Terabox API/Base Code [**HERE**](https://t.me/Privates_Bots/7212).
 - Clone this repo:
 
 ```
-git clone https://github.com/Hrishi2861/Terabox-Downloader-Bot/ && cd Terabox-Downloader-Bot
+git clone https://github.com/sahildesai07/Tera-down-bot/ && cd Tera-down-bot
 ```
 
 - For Debian based distros
