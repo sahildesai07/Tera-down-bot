@@ -18,8 +18,8 @@ Terabox API/Base Code [**HERE**](https://t.me/Privates_Bots/7212).
 ---
 ## Demo bot
 🤖 Terabox downloader bot 🟢
-      @DRM2_bot
-〰️〰️〰️〰️〰️〰️〰️〰️〰️〰️〰️
+     - [@DRM2_bot](https://Telegram.dog/drm2_bot)
+
 ## 😵‍💫 Feature : 
 
 - Public usage & Pvt usage 
@@ -32,7 +32,7 @@ Terabox API/Base Code [**HERE**](https://t.me/Privates_Bots/7212).
 - check token timeout 
 - 🆕 check STATUS how many users are verified via token ( current status )
 - 🆕 Working on Groups & in PM
-〰️〰️〰️〰️〰️〰️〰️〰️〰️〰️〰️
+
 ## Command:
 ```
 /start - alive or not !
