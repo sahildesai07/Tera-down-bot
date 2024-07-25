@@ -15,8 +15,31 @@ Terabox API/Base Code [**HERE**](https://t.me/Privates_Bots/7212).
  Telegram : [@ultroidxTeam](https://Telegram.dog/ultroidxTeam)
 ---
 
+---
+## Demo bot
+🤖 Terabox downloader bot 🟢
+      @DRM2_bot
+〰️〰️〰️〰️〰️〰️〰️〰️〰️〰️〰️
+## 😵‍💫 Feature : 
+• Public usage & Pvt usage 
+• Save all videos into Database Channel 
+• Broadcast 
+• Total user count
+• Admin can download 500MB+
+• Force sub | Channel & Group 
+• Token verification Feature 
+• check token timeout 
+🆕 check STATUS how many users are verified via token ( current status )
+🆕 Working on Groups & in PM
+〰️〰️〰️〰️〰️〰️〰️〰️〰️〰️〰️
+## Command:
+```
+/start - alive or not !
+/check - token timeout (user)
+/broadcast - media/txt support (a)
+/Stats - verified user status (a)
 ## Deploy using CLI
-
+```
 - Deployment instructions uploaded [**HERE**](https://gist.github.com/Hrishi2861/3f04a05b4d86241a454bd284ed1c3dee)
 - Carefully copy-paste every CMD one by one. If you miss maybe your BOT will not run.
 
