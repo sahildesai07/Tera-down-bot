@@ -6,7 +6,6 @@ import asyncio
 import os, time
 import logging
 
-
 aria2 = aria2p.API(
     aria2p.Client(
         host="http://localhost",
@@ -14,19 +13,28 @@ aria2 = aria2p.API(
         secret=""
     )
 )
+
 async def download_video(url, reply_msg, user_mention, user_id):
+    # Fetch API data
     response = requests.get(f"https://true12g.in/api/terabox.php?url={url}")
     response.raise_for_status()
     data = response.json()
 
-    resolutions = data["response"][0]["resolutions"]
-    fast_download_link = resolutions["Fast Download"]
-    thumbnail_url = data["response"][0]["thumbnail"]
-    video_title = data["response"][0]["title"]
+    if data["status"] != "Success":
+        raise Exception("Failed to fetch video data from the API.")
 
+    video_info = data["response"][0]
+    resolutions = video_info["resolutions"]
+    fast_download_link = resolutions.get("Fast Download")
+    thumbnail_url = video_info["thumbnail"]
+    video_title = video_info["title"]
+    video_size = video_info.get("size", "Unknown")
+
+    # Add download to aria2
     download = aria2.add_uris([fast_download_link])
     start_time = datetime.now()
 
+    # Monitor download progress
     while not download.is_complete:
         download.update()
         percentage = download.progress
@@ -36,7 +44,7 @@ async def download_video(url, reply_msg, user_mention, user_id):
         eta = download.eta
         elapsed_time_seconds = (datetime.now() - start_time).total_seconds()
         progress_text = format_progress_bar(
-            filename=video_title,
+            filename=f"{video_title} ({video_size})",
             percentage=percentage,
             done=done,
             total_size=total_size,
@@ -51,9 +59,11 @@ async def download_video(url, reply_msg, user_mention, user_id):
         await reply_msg.edit_text(progress_text)
         await asyncio.sleep(2)
 
+    # Handle download completion
     if download.is_complete:
         file_path = download.files[0].path
 
+        # Download thumbnail
         thumbnail_path = "thumbnail.jpg"
         thumbnail_response = requests.get(thumbnail_url)
         with open(thumbnail_path, "wb") as thumb_file:
@@ -61,11 +71,11 @@ async def download_video(url, reply_msg, user_mention, user_id):
 
         await reply_msg.edit_text("ᴜᴘʟᴏᴀᴅɪɴɢ...")
 
-        return file_path, thumbnail_path, video_title
+        return file_path, thumbnail_path, video_title, video_size
     else:
         raise Exception("Download failed")
 
-async def upload_video(client, file_path, thumbnail_path, video_title, reply_msg, collection_channel_id, user_mention, user_id, message):
+async def upload_video(client, file_path, thumbnail_path, video_title, video_size, reply_msg, collection_channel_id, user_mention, user_id, message):
     file_size = os.path.getsize(file_path)
     uploaded = 0
     start_time = datetime.now()
@@ -79,7 +89,7 @@ async def upload_video(client, file_path, thumbnail_path, video_title, reply_msg
         
         if time.time() - last_update_time > 2:
             progress_text = format_progress_bar(
-                filename=video_title,
+                filename=f"{video_title} ({video_size})",
                 percentage=percentage,
                 done=current,
                 total_size=total,
@@ -101,7 +111,12 @@ async def upload_video(client, file_path, thumbnail_path, video_title, reply_msg
         collection_message = await client.send_video(
             chat_id=collection_channel_id,
             video=file,
-            caption=f"✨ {video_title}\n👤 ʟᴇᴇᴄʜᴇᴅ ʙʏ : {user_mention}\n📥 ᴜsᴇʀ ʟɪɴᴋ: tg://user?id={user_id}",
+            caption=(
+                f"✨ {video_title}\n"
+                f"📦 Size: {video_size}\n"
+                f"👤 ʟᴇᴇᴄʜᴇᴅ ʙʏ: {user_mention}\n"
+                f"📥 ᴜsᴇʀ ʟɪɴᴋ: tg://user?id={user_id}"
+            ),
             thumb=thumbnail_path,
             progress=progress
         )
@@ -116,6 +131,7 @@ async def upload_video(client, file_path, thumbnail_path, video_title, reply_msg
 
     await reply_msg.delete()
 
+    # Clean up temporary files
     os.remove(file_path)
     os.remove(thumbnail_path)
     return collection_message.id
