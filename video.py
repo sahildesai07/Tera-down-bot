@@ -15,20 +15,23 @@ aria2 = aria2p.API(
 )
 
 async def download_video(url, reply_msg, user_mention, user_id):
+async def download_video(url, reply_msg, user_mention, user_id):
     # Fetch API data
-    response = requests.get(f"https://true12g.in/api/terabox.php?url={url}")
+    response = requests.get(f"https://terabox.udayscriptsx.workers.dev/?url={url}")
     response.raise_for_status()
     data = response.json()
 
-    if data["status"] != "Success":
-        raise Exception("Failed to fetch video data from the API.")
+    if not data:
+        raise Exception("API response is empty or invalid.")
 
-    video_info = data["response"][0]
-    resolutions = video_info["resolutions"]
-    fast_download_link = resolutions.get("Fast Download")
-    thumbnail_url = video_info["thumbnail"]
-    video_title = video_info["title"]
-    video_size = video_info.get("size", "Unknown")
+    video_file_name = data.get("file_name")
+    fast_download_link = data.get("direct_link")
+    thumbnail_url = data.get("thumb")
+    video_size = data.get("size", "Unknown")
+    video_size_bytes = data.get("sizebytes", 0)
+
+    if not fast_download_link:
+        raise Exception("Fast download link is missing in the API response.")
 
     # Add download to aria2
     download = aria2.add_uris([fast_download_link])
@@ -44,7 +47,7 @@ async def download_video(url, reply_msg, user_mention, user_id):
         eta = download.eta
         elapsed_time_seconds = (datetime.now() - start_time).total_seconds()
         progress_text = format_progress_bar(
-            filename=f"{video_title} ({video_size})",
+            filename=f"{video_file_name} ({video_size})",
             percentage=percentage,
             done=done,
             total_size=total_size,
@@ -71,10 +74,9 @@ async def download_video(url, reply_msg, user_mention, user_id):
 
         await reply_msg.edit_text("ᴜᴘʟᴏᴀᴅɪɴɢ...")
 
-        return file_path, thumbnail_path, video_title, video_size
+        return file_path, thumbnail_path, video_file_name, video_size
     else:
         raise Exception("Download failed")
-
 async def upload_video(client, file_path, thumbnail_path, video_title, video_size, reply_msg, collection_channel_id, user_mention, user_id, message):
     file_size = os.path.getsize(file_path)
     uploaded = 0
