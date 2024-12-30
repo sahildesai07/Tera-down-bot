@@ -6,6 +6,7 @@ import asyncio
 import os, time
 import logging
 
+# Initialize aria2 client
 aria2 = aria2p.API(
     aria2p.Client(
         host="http://localhost",
@@ -14,7 +15,6 @@ aria2 = aria2p.API(
     )
 )
 
-async def download_video(url, reply_msg, user_mention, user_id):
 async def download_video(url, reply_msg, user_mention, user_id):
     # Fetch API data
     response = requests.get(f"https://terabox.udayscriptsx.workers.dev/?url={url}")
@@ -77,6 +77,8 @@ async def download_video(url, reply_msg, user_mention, user_id):
         return file_path, thumbnail_path, video_file_name, video_size
     else:
         raise Exception("Download failed")
+
+
 async def upload_video(client, file_path, thumbnail_path, video_title, video_size, reply_msg, collection_channel_id, user_mention, user_id, message):
     file_size = os.path.getsize(file_path)
     uploaded = 0
