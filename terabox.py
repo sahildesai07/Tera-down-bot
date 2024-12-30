@@ -460,7 +460,7 @@ async def broadcast_command(client, message):
 
         
 
-        status = f"""<b><u>Broadcast Completed</u></b>
+        status = f"<b><u>Broadcast Completed</u></b>
 
 
 
@@ -472,7 +472,7 @@ Blocked Users: <code>{blocked}</code>
 
 Deleted Accounts: <code>{deleted}</code>
 
-Unsuccessful: <code>{unsuccessful}</code>"""
+Unsuccessful: <code>{unsuccessful}</code>"
 
         
 
