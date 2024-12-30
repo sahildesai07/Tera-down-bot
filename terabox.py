@@ -39,18 +39,18 @@ if not api_hash:
     logging.error("TELEGRAM_HASH variable is missing! Exiting now")
     exit(1)
     
-bot_token = os.environ.get('BOT_TOKEN', '')
+bot_token = os.environ.get('BOT_TOKEN', '7971343421:AAEatwpyW7Pmfz64DoOv4jE1dL-ymOaP_Xw')
 if not bot_token:
     logging.error("BOT_TOKEN variable is missing! Exiting now")
     exit(1)
-dump_id = os.environ.get('DUMP_CHAT_ID', '@logchannelfuyfth')
+dump_id = os.environ.get('DUMP_CHAT_ID', '-1002345949358')
 if not dump_id:
     logging.error("DUMP_CHAT_ID variable is missing! Exiting now")
     exit(1)
 else:
     dump_id = int(dump_id)
 
-fsub_id = os.environ.get('FSUB_ID', '@logchannelfuyfth')
+fsub_id = os.environ.get('FSUB_ID', '-1002345949358')
 if not fsub_id:
     logging.error("FSUB_ID variable is missing! Exiting now")
     exit(1)
@@ -58,7 +58,7 @@ else:
     fsub_id = int(fsub_id)
 
 
-mongo_url = os.environ.get('MONGO_URL', 'mongodb+srv://hegodal811:rsRu17pspZAcp6V7@cluster0.prsvqax.mongodb.net/?retryWrites=true&w=majority')
+mongo_url = os.environ.get('MONGO_URL', 'mongodb+srv://opabhikji:opabhikji@cluster0.ec9rz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0 mongodb+srv://opabhik:opabhik@cluster0.1wb04ib.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
 client = MongoClient(mongo_url)
 db = client['cphdlust']
 users_collection = db['users']
