@@ -67,7 +67,7 @@ async def download_video(url, reply_msg, user_mention, user_id):
         file_path = download.files[0].path
 
         # Download thumbnail
-        thumbnail_path = "thumbnail.jpg"
+        thumbnail_path = "https://next-images.123rf.com/index/_next/image/?url=https://assets-cdn.123rf.com/index/static/assets/top-section-bg.jpeg&w=3840&q=75"
         thumbnail_response = requests.get(thumbnail_url)
         with open(thumbnail_path, "wb") as thumb_file:
             thumb_file.write(thumbnail_response.content)
