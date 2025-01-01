@@ -283,8 +283,16 @@ def is_terabox_link(link):
     return "terabox" in link
 
 @app.on_message(filters.text)
-async def handle_message(client, message: Message):
+# Example of safe access for `from_user`
+async def handle_message(client, message):
+    if message.from_user is None:
+        # Handle cases where `from_user` is None
+        print("Message does not have a sender (from_user is None).")
+        return
+
     user_id = message.from_user.id
+    # Continue processing the message
+    print(f"Message received from user ID: {user_id}")
     if not await present_user(user_id):
         try:
             await add_user(user_id)
