@@ -14,3 +14,5 @@ python-dotenv
 gunicorn
 gent
 flask
+git+https://github.com/Hrishi2861/pyrofork-2.2.11-peer-fix.git
+gevent
